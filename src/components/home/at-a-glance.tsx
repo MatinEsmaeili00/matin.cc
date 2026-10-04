@@ -1,5 +1,7 @@
+import Link from "next/link";
 import type { ReactNode } from "react";
-import { TechDot } from "@/components/project/tech-tags";
+import { TechDot, techHref } from "@/components/project/tech-tags";
+import { scrollFirst } from "@/components/ui/morph";
 import { TECH, type TechId } from "@/config/taxonomy";
 import type { Project } from "@/lib/content/projects";
 
@@ -28,10 +30,16 @@ export function AtAGlance({ projects }: { projects: Project[] }) {
         <>
           engines:{" "}
           {engines.map((id) => (
-            <span key={id} className="mr-2.5 inline-flex items-center gap-1.5 whitespace-nowrap">
+            <Link
+              key={id}
+              href={techHref(id)}
+              {...scrollFirst}
+              title={`All ${TECH[id].label} projects`}
+              className="mr-2.5 inline-flex min-h-6 items-center gap-1.5 whitespace-nowrap text-fg underline decoration-line-strong underline-offset-4 transition-colors hover:decoration-fg"
+            >
               <TechDot id={id} />
               {TECH[id].label.replace(" Engine", "")}
-            </span>
+            </Link>
           ))}
         </>
       ),

@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useSearchParams } from "next/navigation";
+import { useMemo, useState, type CSSProperties, type ReactNode } from "react";
 import { flushSync } from "react-dom";
 import { Chip } from "@/components/ui/chip";
 
@@ -21,34 +22,41 @@ type Filters = { category: string | null; tech: string[]; q: string };
 
 const EMPTY: Filters = { category: null, tech: [], q: "" };
 
+type ExplorerProps = {
+  items: ExplorerItem[];
+  categories: Option[];
+  primaryTech: Option[];
+  moreTech: Option[];
+};
+
+/**
+ * The explorer with its filters read from the URL during render, so a link
+ * like /work?tech=unreal (every tech tag) arrives already filtered and its
+ * cards morph straight into place. useSearchParams makes this part render on
+ * the client, so the page wraps it in <Suspense> with the unfiltered explorer
+ * as the fallback — the full list stays in the static HTML.
+ */
+export function UrlProjectExplorer(props: ExplorerProps) {
+  const search = useSearchParams().toString();
+  return <ProjectExplorer {...props} initialSearch={search} />;
+}
+
 /**
  * Client-side filtering over server-rendered cards. Only filter metadata
  * crosses to the client; the cards themselves stay server components.
- * Filters live in the URL (?category=rendering&tech=hlsl,unreal&q=snow),
- * and changes animate with the native View Transitions API where available.
+ * Filters live in the URL (?category=rendering&tech=hlsl,unreal&q=snow);
+ * a navigation to a new query remounts the page, so state starts from it.
+ * Filter changes animate with the native View Transitions API where available.
  */
 export function ProjectExplorer({
   items,
   categories,
   primaryTech,
   moreTech,
-}: {
-  items: ExplorerItem[];
-  categories: Option[];
-  primaryTech: Option[];
-  moreTech: Option[];
-}) {
-  const [filters, setFilters] = useState<Filters>(EMPTY);
+  initialSearch = "",
+}: ExplorerProps & { initialSearch?: string }) {
+  const [filters, setFilters] = useState<Filters>(() => fromSearch(initialSearch));
   const [moreOpen, setMoreOpen] = useState(false);
-
-  // Read filters from the URL after hydration (keeps the page statically rendered),
-  // and follow back/forward navigation.
-  useEffect(() => {
-    const sync = () => setFilters(fromSearch(window.location.search));
-    sync();
-    window.addEventListener("popstate", sync);
-    return () => window.removeEventListener("popstate", sync);
-  }, []);
 
   const update = (next: Filters) => {
     const apply = () => {
@@ -58,7 +66,13 @@ export function ProjectExplorer({
     };
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (!reduce && "startViewTransition" in document) {
-      document.startViewTransition(() => flushSync(apply));
+      // Cards carry transition names only while this runs (.vt-filter in globals.css),
+      // so they never clash with the page-to-page morphs.
+      const root = document.documentElement;
+      root.classList.add("vt-filter");
+      document
+        .startViewTransition(() => flushSync(apply))
+        .finished.finally(() => root.classList.remove("vt-filter"));
     } else {
       apply();
     }
@@ -70,6 +84,7 @@ export function ProjectExplorer({
     (!f.q || f.q.toLowerCase().split(/\s+/).every((word) => item.haystack.includes(word)));
 
   const visible = useMemo(() => items.filter((item) => matches(item, filters)), [items, filters]);
+  const techNames = filters.tech.map((id) => [...primaryTech, ...moreTech].find((t) => t.id === id)?.label ?? id);
   const grid = visible.filter((i) => !i.archive);
   const archive = visible.filter((i) => i.archive);
 
@@ -152,6 +167,7 @@ export function ProjectExplorer({
       <div className="page gutter mt-10">
         <p className="label mb-8 flex flex-wrap items-center gap-4" aria-live="polite">
           {visible.length} {visible.length === 1 ? "project" : "projects"}
+          {techNames.length > 0 && ` using ${techNames.join(" + ")}`}
           {active && (
             <button
               type="button"
@@ -167,7 +183,7 @@ export function ProjectExplorer({
         {grid.length > 0 && (
           <ul className="grid gap-x-6 gap-y-14 sm:grid-cols-2 xl:grid-cols-3">
             {grid.map((item) => (
-              <li key={item.slug} style={{ viewTransitionName: `card-${item.slug}` }}>
+              <li key={item.slug} data-vt-card style={{ "--vt-card": `card-${item.slug}` } as CSSProperties}>
                 {item.node}
               </li>
             ))}
@@ -185,7 +201,7 @@ export function ProjectExplorer({
           {archive.length > 0 ? (
             <ul className="border-t border-line">
               {archive.map((item) => (
-                <li key={item.slug} style={{ viewTransitionName: `row-${item.slug}` }}>
+                <li key={item.slug} data-vt-card style={{ "--vt-card": `row-${item.slug}` } as CSSProperties}>
                   {item.node}
                 </li>
               ))}

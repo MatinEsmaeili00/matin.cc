@@ -210,6 +210,19 @@
   padding-inline: 0;
   background: none;
 }
+/* Tags are links to /work?tech=<id>: deepen the tint on hover. 24px tall (WCAG 2.5.8 target size). */
+a.tech-tag {
+  min-height: 1.5rem;
+  transition: background-color 0.2s;
+}
+a.tech-tag:hover {
+  background: color-mix(in oklab, var(--tech-c) 24%, transparent);
+}
+a.tech-tag[data-plain]:hover {
+  background: none;
+  text-decoration: underline;
+  text-underline-offset: 0.25em;
+}
 .tech-dot {
   flex-shrink: 0;
   width: 0.4375rem;
@@ -285,6 +298,72 @@
     rotate: -90deg;
     scale: 0.4;
   }
+}
+
+/*
+ * Page transitions (React <ViewTransition>, see components/ui/morph.tsx).
+ * Opening a project grows its card media into the page's hero and flies the
+ * title into place while the rest of the page rises in. Browsers without the
+ * View Transitions API navigate normally; reduced motion turns it all off.
+ */
+::view-transition {
+  /* Clicks during the animation reach the live page instead of being lost. */
+  pointer-events: none;
+}
+::view-transition-old(root) {
+  animation-duration: 0.2s;
+}
+::view-transition-group(.morph-media),
+::view-transition-group(.morph-text) {
+  animation-duration: 0.55s;
+  animation-timing-function: var(--ease-out-expo);
+}
+/* Media keeps its frame: crop to the morphing box (cards and heroes differ in ratio). */
+::view-transition-group(.morph-media) {
+  overflow: clip;
+  border-radius: 0.5rem; /* rounded-lg, like the media frames */
+}
+::view-transition-old(.morph-media),
+::view-transition-new(.morph-media) {
+  height: 100%;
+  object-fit: cover;
+}
+::view-transition-image-pair(.morph-media),
+::view-transition-image-pair(.morph-text) {
+  animation-name: vt-soften;
+}
+/* A named card with no counterpart on the new page just leaves, as fast as the page around it. */
+::view-transition-old(.morph-media):only-child,
+::view-transition-old(.morph-text):only-child {
+  animation-duration: 0.2s;
+}
+::view-transition-new(.page-rise) {
+  animation: vt-rise 0.6s var(--ease-out-expo) 0.1s both;
+}
+@keyframes vt-soften {
+  35% {
+    filter: blur(2px);
+  }
+}
+@keyframes vt-rise {
+  from {
+    opacity: 0;
+    translate: 0 2rem;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  ::view-transition-group(*),
+  ::view-transition-image-pair(*) {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+  }
+}
+
+/* Work explorer: cards get transition names only while a filter change animates. */
+.vt-filter [data-vt-card] {
+  view-transition-name: var(--vt-card);
 }
 
 /* Hide scrollbars on horizontally scrolling chip rows, keep them scrollable. */

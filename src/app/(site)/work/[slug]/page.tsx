@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import type { ReactNode } from "react";
+import { ViewTransition, type ReactNode } from "react";
 import { getMDXComponents } from "@/components/mdx/mdx-components";
 import { ProjectMedia } from "@/components/media/project-media";
 import { categoryLabels } from "@/components/project/format";
@@ -16,6 +16,7 @@ import { RepositoryPanel } from "@/components/project/repository-panel";
 import { Toc } from "@/components/project/toc";
 import { VideoList } from "@/components/project/video-list";
 import { ArrowLeft, ArrowRight } from "@/components/ui/icons";
+import { Morph, morphName, openProject } from "@/components/ui/morph";
 import { extractToc, renderMDX } from "@/lib/content/mdx";
 import { getAllProjects, getProject } from "@/lib/content/projects";
 import { JsonLd, projectJsonLd } from "@/lib/seo";
@@ -58,108 +59,132 @@ export default async function ProjectPage(props: PageProps<"/work/[slug]">) {
   const extraVideos = project.videos.filter((v) => v.id !== project.youtube);
 
   return (
-    <article>
-      <JsonLd data={projectJsonLd(project, heroVideo)} />
+    // Opened from a card ("open-project"), the page rises in while the card's media and title morph into place.
+    <ViewTransition enter={{ "open-project": "page-rise", default: "none" }} default="none">
+      <article>
+        <JsonLd data={projectJsonLd(project, heroVideo)} />
 
-      <header className="page gutter pt-10 md:pt-16">
-        <Link href="/work" className="label inline-flex min-h-11 items-center gap-3 transition-colors hover:text-fg">
-          <ArrowLeft className="size-3.5" /> All work
-        </Link>
-
-        <p className="label mt-8 md:mt-12">
-          {categoryLabels(project.categories).join(" / ")} · {project.period} · <Status status={project.status} />
-        </p>
-        <h1 className="mt-4 max-w-[18ch] text-title font-semibold tracking-[-0.035em] text-balance semi-wide">
-          {project.title}
-        </h1>
-        <p className="mt-6 max-w-3xl text-lead text-pretty text-fg-muted">{project.summary}</p>
-
-        <div className="mt-10">
-          <ProjectFacts project={project} />
-        </div>
-        <div className="mt-6">
-          <ProjectLinks project={project} />
-        </div>
-      </header>
-
-      <div className="page gutter mt-10 md:mt-14">
-        <ProjectHeroMedia project={project} />
-      </div>
-
-      {(project.highlights.length > 0 || project.metrics.length > 0) && (
-        <div className="page gutter mt-16 grid gap-10 md:mt-24 lg:grid-cols-12">
-          {project.highlights.length > 0 && (
-            <div className="lg:col-span-8 lg:col-start-5">
-              <p className="label mb-5">Highlights</p>
-              <ul className="space-y-3">
-                {project.highlights.map((h) => (
-                  <li key={h} className="flex gap-4 text-lead leading-snug text-fg">
-                    <span aria-hidden className="mt-[0.6em] h-px w-4 shrink-0 bg-accent" />
-                    {h}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-          {project.metrics.length > 0 && (
-            <div className="lg:col-span-8 lg:col-start-5">
-              <Metrics items={project.metrics} />
-            </div>
-          )}
-        </div>
-      )}
-
-      {project.items.length > 0 && (
-        <Section title="Pieces" count={project.items.length}>
-          <PieceGrid items={project.items} />
-        </Section>
-      )}
-
-      {content && (
-        <div className="page gutter mt-16 grid gap-10 md:mt-24 lg:grid-cols-12">
-          <aside className="hidden lg:col-span-3 lg:block">
-            <Toc entries={toc} />
-          </aside>
-          <div className="prose-case min-w-0 lg:col-span-8 lg:col-start-5">{content}</div>
-        </div>
-      )}
-
-      {extraVideos.length > 0 && (
-        <Section title="Videos" count={extraVideos.length}>
-          <VideoList videos={extraVideos} />
-        </Section>
-      )}
-
-      {project.gallery.length > 0 && (
-        <Section title="Gallery" count={project.gallery.length}>
-          <Gallery items={project.gallery} />
-        </Section>
-      )}
-
-      {project.github && (
-        <Section title="Repository">
-          <RepositoryPanel repo={project.github} />
-        </Section>
-      )}
-
-      {next && next.slug !== project.slug && (
-        <nav aria-label="Next project" className="page gutter mt-32">
-          <Link href={next.url} className="group grid gap-6 border-t border-line pt-6 md:grid-cols-12" data-preview-root>
-            <div className="md:col-span-4">
-              <p className="label">Next project</p>
-              <p className="mt-3 flex items-center gap-4 text-heading font-semibold tracking-tight semi-wide group-hover:text-accent">
-                {next.title}
-                <ArrowRight className="size-5 shrink-0" />
-              </p>
-              <p className="mt-3 text-fg-muted">{next.summary}</p>
-            </div>
-            <div className="md:col-span-5 md:col-start-8">
-              <ProjectMedia slug={next.slug} cover={next.cover} preview={next.preview} youtube={next.youtube} sizes="(min-width: 768px) 40vw, 100vw" />
-            </div>
+        <header className="page gutter pt-10 md:pt-16">
+          <Link href="/work" className="label inline-flex min-h-11 items-center gap-3 transition-colors hover:text-fg">
+            <ArrowLeft className="size-3.5" /> All work
           </Link>
-        </nav>
-      )}
-    </article>
+
+          <p className="label mt-8 md:mt-12">
+            {categoryLabels(project.categories).join(" / ")} · {project.period} · <Status status={project.status} />
+          </p>
+          <h1 className="mt-4 max-w-[18ch] text-title font-semibold tracking-[-0.035em] text-balance semi-wide">
+            {/* The morph target hugs the text, so a card title scales into it without stretching. */}
+            <Morph name={morphName.title(project.slug)} kind="text">
+              <span className="inline-block">{project.title}</span>
+            </Morph>
+          </h1>
+          <p className="mt-6 max-w-3xl text-lead text-pretty text-fg-muted">{project.summary}</p>
+
+          <div className="mt-10">
+            <ProjectFacts project={project} />
+          </div>
+          <div className="mt-6">
+            <ProjectLinks project={project} />
+          </div>
+        </header>
+
+        <div className="page gutter mt-10 md:mt-14">
+          <Morph name={morphName.media(project.slug)}>
+            <ProjectHeroMedia project={project} />
+          </Morph>
+        </div>
+
+        {(project.highlights.length > 0 || project.metrics.length > 0) && (
+          <div className="page gutter mt-16 grid gap-10 md:mt-24 lg:grid-cols-12">
+            {project.highlights.length > 0 && (
+              <div className="lg:col-span-8 lg:col-start-5">
+                <p className="label mb-5">Highlights</p>
+                <ul className="space-y-3">
+                  {project.highlights.map((h) => (
+                    <li key={h} className="flex gap-4 text-lead leading-snug text-fg">
+                      <span aria-hidden className="mt-[0.6em] h-px w-4 shrink-0 bg-accent" />
+                      {h}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {project.metrics.length > 0 && (
+              <div className="lg:col-span-8 lg:col-start-5">
+                <Metrics items={project.metrics} />
+              </div>
+            )}
+          </div>
+        )}
+
+        {project.items.length > 0 && (
+          <Section title="Pieces" count={project.items.length}>
+            <PieceGrid slug={project.slug} items={project.items} />
+          </Section>
+        )}
+
+        {content && (
+          <div className="page gutter mt-16 grid gap-10 md:mt-24 lg:grid-cols-12">
+            <aside className="hidden lg:col-span-3 lg:block">
+              <Toc entries={toc} />
+            </aside>
+            <div className="prose-case min-w-0 lg:col-span-8 lg:col-start-5">{content}</div>
+          </div>
+        )}
+
+        {extraVideos.length > 0 && (
+          <Section title="Videos" count={extraVideos.length}>
+            <VideoList videos={extraVideos} />
+          </Section>
+        )}
+
+        {project.gallery.length > 0 && (
+          <Section title="Gallery" count={project.gallery.length}>
+            <Gallery items={project.gallery} />
+          </Section>
+        )}
+
+        {project.github && (
+          <Section title="Repository">
+            <RepositoryPanel repo={project.github} />
+          </Section>
+        )}
+
+        {next && next.slug !== project.slug && (
+          <nav aria-label="Next project" className="page gutter mt-32">
+            <Link
+              href={next.url}
+              {...openProject}
+              transitionTypes={["open-project", "open-next"]}
+              className="group grid gap-6 border-t border-line pt-6 md:grid-cols-12"
+              data-preview-root
+            >
+              <div className="md:col-span-4">
+                <p className="label">Next project</p>
+                <p className="mt-3 flex items-center gap-4 text-heading font-semibold tracking-tight semi-wide group-hover:text-accent">
+                  <Morph name={morphName.title(next.slug)} kind="text" only="open-next">
+                    <span>{next.title}</span>
+                  </Morph>
+                  <ArrowRight className="size-5 shrink-0" />
+                </p>
+                <p className="mt-3 text-fg-muted">{next.summary}</p>
+              </div>
+              <div className="md:col-span-5 md:col-start-8">
+                <Morph name={morphName.media(next.slug)} only="open-next">
+                  <ProjectMedia
+                    slug={next.slug}
+                    cover={next.cover}
+                    preview={next.preview}
+                    youtube={next.youtube}
+                    sizes="(min-width: 768px) 40vw, 100vw"
+                  />
+                </Morph>
+              </div>
+            </Link>
+          </nav>
+        )}
+      </article>
+    </ViewTransition>
   );
 }
 

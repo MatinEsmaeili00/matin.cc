@@ -4,6 +4,7 @@ import { PreviewVideo } from "@/components/media/preview-video";
 import { ProceduralCover } from "@/components/media/procedural-cover";
 import { YouTubeHoverPreview } from "@/components/media/youtube-hover-preview";
 import { YouTubePlayer } from "@/components/media/youtube-player";
+import { Morph, morphName, openProject } from "@/components/ui/morph";
 import type { Project, ProjectItem } from "@/lib/content/projects";
 import { cn } from "@/lib/utils";
 import { TechTags } from "./tech-tags";
@@ -31,47 +32,51 @@ export function ItemMedia({ item, sizes, className }: { item: ProjectItem; sizes
   );
 }
 
-/** Homepage card for a piece inside a collection — links to its spot on the project page. */
+/** Homepage card for a piece inside a collection — links to (and morphs into) its spot on the project page. */
 export function ItemCard({
   project,
   item,
   sizes = "(min-width: 1280px) 33vw, (min-width: 640px) 50vw, 100vw",
 }: {
-  project: Pick<Project, "url" | "title" | "tech">;
+  project: Pick<Project, "slug" | "url" | "title" | "tech">;
   item: ProjectItem;
   sizes?: string;
 }) {
   return (
     <article className="group" data-preview-root>
-      <Link href={`${project.url}#${item.id}`} className="block focus-visible:outline-offset-4">
-        <ItemMedia item={item} sizes={sizes} />
+      <Link href={`${project.url}#${item.id}`} {...openProject} className="block focus-visible:outline-offset-4">
+        <Morph name={morphName.piece(project.slug, item.id)}>
+          <ItemMedia item={item} sizes={sizes} />
+        </Morph>
         <h3 className="mt-4 text-xl leading-tight font-semibold tracking-tight transition-colors group-hover:text-accent">
           {item.title}
         </h3>
         {item.summary && <p className="mt-2 line-clamp-2 text-[0.9375rem] leading-relaxed text-fg-muted">{item.summary}</p>}
-        <TechTags tech={item.tech.length ? item.tech : project.tech} limit={3} className="mt-3" />
       </Link>
+      <TechTags tech={item.tech.length ? item.tech : project.tech} limit={3} className="mt-3" />
     </article>
   );
 }
 
 /** The "Pieces" grid on a collection's project page. */
-export function PieceGrid({ items }: { items: ProjectItem[] }) {
+export function PieceGrid({ slug, items }: { slug: string; items: ProjectItem[] }) {
   return (
     <ul className="grid gap-x-6 gap-y-12 md:grid-cols-2">
       {items.map((item) => (
         <li key={item.id} id={item.id} className="scroll-mt-24" data-preview-root>
-          {item.youtube && item.image ? (
-            <YouTubePlayer
-              id={item.youtube}
-              title={item.title}
-              poster={item.image}
-              preview={item.video}
-              sizes="(min-width: 768px) 50vw, 100vw"
-            />
-          ) : (
-            <ItemMedia item={item} sizes="(min-width: 768px) 50vw, 100vw" />
-          )}
+          <Morph name={morphName.piece(slug, item.id)}>
+            {item.youtube && item.image ? (
+              <YouTubePlayer
+                id={item.youtube}
+                title={item.title}
+                poster={item.image}
+                preview={item.video}
+                sizes="(min-width: 768px) 50vw, 100vw"
+              />
+            ) : (
+              <ItemMedia item={item} sizes="(min-width: 768px) 50vw, 100vw" />
+            )}
+          </Morph>
           <h3 className="mt-4 text-lg font-semibold tracking-tight">{item.title}</h3>
           {item.summary && <p className="mt-1.5 text-[0.9375rem] leading-relaxed text-fg-muted">{item.summary}</p>}
           <TechTags tech={item.tech} className="mt-3" />

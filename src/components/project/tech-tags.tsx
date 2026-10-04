@@ -1,10 +1,17 @@
+import Link from "next/link";
 import type { CSSProperties } from "react";
+import { scrollFirst } from "@/components/ui/morph";
 import { techColor, techLabel, type TechId } from "@/config/taxonomy";
 import { cn } from "@/lib/utils";
 
 export function techStyle(id: TechId): CSSProperties {
   const { color, dark } = techColor(id);
   return { "--tech": color, ...(dark && { "--tech-dark": dark }) } as CSSProperties;
+}
+
+/** Every project that uses a technology — the Work page reads the filter from the URL. */
+export function techHref(id: TechId): string {
+  return `/work?tech=${id}`;
 }
 
 /** A technology's colour on its own — for inline lists where a full tag is too much. */
@@ -14,7 +21,9 @@ export function TechDot({ id, className }: { id: TechId; className?: string }) {
 
 /**
  * Colour-coded tech tags. Each technology keeps its colour everywhere it
- * appears (TECH in config/taxonomy.ts). `plain` drops the tint for dense rows.
+ * appears (TECH in config/taxonomy.ts), and each tag links to every project
+ * that uses it. Never render these inside another link. `plain` drops the
+ * tint for dense rows.
  */
 export function TechTags({
   tech,
@@ -32,9 +41,18 @@ export function TechTags({
   return (
     <ul className={cn("flex flex-wrap", plain ? "gap-x-3 gap-y-1" : "gap-1.5", className)}>
       {shown.map((id) => (
-        <li key={id} className="tech-tag" data-plain={plain || undefined} style={techStyle(id)}>
-          <span aria-hidden className="tech-dot" />
-          {techLabel(id)}
+        <li key={id} className="flex">
+          <Link
+            href={techHref(id)}
+            {...scrollFirst}
+            className="tech-tag"
+            data-plain={plain || undefined}
+            style={techStyle(id)}
+            title={`All ${techLabel(id)} projects`}
+          >
+            <span aria-hidden className="tech-dot" />
+            {techLabel(id)}
+          </Link>
         </li>
       ))}
     </ul>

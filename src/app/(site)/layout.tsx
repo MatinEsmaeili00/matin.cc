@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+import { ScrollFirst } from "@/components/layout/scroll-first";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 
@@ -12,6 +14,10 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
         Skip to content
       </a>
       <SiteHeader />
+      {/* Reads the URL, so it sits in its own Suspense boundary (renders nothing). */}
+      <Suspense fallback={null}>
+        <ScrollFirst />
+      </Suspense>
       <main id="main" className="flex-1 pt-14">
         {children}
       </main>

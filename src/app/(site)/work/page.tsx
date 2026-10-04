@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { ArchiveRow } from "@/components/project/archive-list";
 import { categoryLabels, techLabels } from "@/components/project/format";
 import { ProjectCard } from "@/components/project/project-card";
-import { ProjectExplorer, type ExplorerItem } from "@/components/project/project-explorer";
+import { ProjectExplorer, UrlProjectExplorer, type ExplorerItem } from "@/components/project/project-explorer";
 import { CATEGORIES, TECH, TECH_IDS, techColor } from "@/config/taxonomy";
 import { byRecency, getAllProjects, toSummary } from "@/lib/content/projects";
 
@@ -38,6 +39,16 @@ export default async function WorkPage() {
   const usedTech = TECH_IDS.filter((id) => techCount(id) > 0);
   const option = (id: (typeof TECH_IDS)[number]) => ({ id, label: TECH[id].label, ...techColor(id) });
 
+  const explorer = {
+    items,
+    categories: usedCategories.map((c) => ({ id: c.id, label: c.label, dot: c.id === "lab" })),
+    primaryTech: usedTech.filter((id) => "primary" in TECH[id]).map(option),
+    moreTech: usedTech
+      .filter((id) => !("primary" in TECH[id]))
+      .sort((a, b) => techCount(b) - techCount(a))
+      .map(option),
+  };
+
   return (
     <>
       <header className="page gutter pt-12 pb-10 md:pt-20 md:pb-14">
@@ -49,15 +60,10 @@ export default async function WorkPage() {
         </p>
       </header>
 
-      <ProjectExplorer
-        items={items}
-        categories={usedCategories.map((c) => ({ id: c.id, label: c.label, dot: c.id === "lab" }))}
-        primaryTech={usedTech.filter((id) => "primary" in TECH[id]).map(option)}
-        moreTech={usedTech
-          .filter((id) => !("primary" in TECH[id]))
-          .sort((a, b) => techCount(b) - techCount(a))
-          .map(option)}
-      />
+      {/* Filters come from the URL (?tech=unreal); the unfiltered explorer is the static fallback. */}
+      <Suspense fallback={<ProjectExplorer {...explorer} />}>
+        <UrlProjectExplorer {...explorer} />
+      </Suspense>
     </>
   );
 }

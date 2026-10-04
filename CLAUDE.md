@@ -93,6 +93,16 @@ code with `<GitHubCode>` rather than copying it when the repo is public.
   tiny animated icon in the bar and its header (`components/home/section-icon.tsx`, keyed by section
   id: cog · viewfinder with blinking REC · pulsing live dot · travelling sine · material ball) — a new
   section id gets no icon until it's added there.
+- **Opening a project morphs into it** (React `<ViewTransition>` + the View Transitions API; browsers
+  without it just navigate). The card's media grows into the project hero, the title flies into the
+  `<h1>`, and the page rises in (`open-project` transition type). Wrap both sides in
+  `<Morph name={morphName.media(slug)}>` / `morphName.title` / `morphName.piece` (`components/ui/morph.tsx`)
+  and spread `{...openProject}` on links that open a project. **A name must be unique on a page** — a
+  duplicate cancels the whole transition (that's why "Now building" titles aren't named). React skips
+  morphs it measures off-screen, so `components/layout/scroll-first.tsx` scrolls the new page into
+  place first for links marked `data-scroll-first`. On phones the hero is below the fold, so only the
+  title morphs. "Next project" morphs only for its own link (`only="open-next"`). CSS: "Page
+  transitions" in globals.css. Test morphs on a production build (`next start`) — dev doesn't prefetch.
 - **Live dot** (`components/ui/live-dot.tsx`) = work in progress: the In the Lab section,
   "Now building" in the hero, and every `status: active` project ("In development", via
   `components/project/status.tsx`).
@@ -212,8 +222,12 @@ public/media/<slug>/        optimized media per project
 - **Server components by default.** Client components only where interaction needs it:
   `youtube-player`, `preview-video`, `youtube-hover-preview`, `embed-facade`, `copy-button`,
   `mobile-nav`, `theme-toggle`, `project-explorer`, `section-nav`, `expandable-grid`, `showreel`,
-  `admin-forms`. Pass server-rendered nodes into
+  `scroll-first`, `admin-forms`. Pass server-rendered nodes into
   client components as props (explorer/tabs filter server-rendered cards).
+- `/work` reads its filters from the URL with `useSearchParams` inside `<Suspense>` (fallback = the
+  unfiltered explorer, so the static HTML keeps the full list). Navigating to a new query
+  (`/work?tech=unreal`) remounts it already filtered; filter chips change state in place and animate
+  with `document.startViewTransition` (cards get names only during that, via `.vt-filter`).
 - Card/grid motion = local muted MP4 loops; a muted YouTube embed only as a hover/on-screen fallback
   (one at a time). Full YouTube players (with sound) load only on click.
 - No new UI dependencies without a reason; animation is CSS (scroll-driven `.reveal`, transform-only
@@ -239,6 +253,9 @@ public/media/<slug>/        optimized media per project
   colour everywhere (`TECH[id].color`; `dark` overrides it in the dark theme, e.g. Unreal turns
   white). Render tech with `TechTags` / `TechDot` (`components/project/tech-tags.tsx`), never as
   plain text or hand-picked colours. The `.tech-tag` CSS keeps text at AA in both themes.
+- **Every tech tag is a link** to `/work?tech=<id>` (all projects using it). Links can't nest, so
+  cards keep their tags *outside* the main card link, and archive rows use a stretched title link
+  (`after:absolute after:inset-0`) with the tags above it (`relative z-10`).
 - Type: Archivo (variable width — `semi-wide`/`wide` for display) + JetBrains Mono for metadata
   (`label` utility). Fluid sizes: `text-display`, `text-title`, `text-heading`, `text-lead`.
 - Layout: `page gutter` on every section wrapper. Case-study prose: `.prose-case` in globals.css.
