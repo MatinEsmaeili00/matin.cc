@@ -3,9 +3,10 @@ title: Snow Deformation
 summary: A UE 5.8 plugin that simulates a persistent, world-anchored snow height field on the GPU and presses real footprints into it.
 year: 2026
 status: active
-tier: featured
+tier: project
 priority: 100
-categories: [rendering, tools, shaders]
+categories: [rendering, tools, shaders, lab]
+homeSection: lab
 tech: [unreal, cpp, hlsl, compute-shaders, rdg, gpu-simulation, materials]
 role: Solo developer
 teamSize: 1
@@ -28,20 +29,17 @@ It's built from scratch on the low-level path: `FGlobalShader`, `SHADER_PARAMETE
 
 The game thread collects contacts; the render thread does all the work.
 
-```text title="Frame pipeline" nolines
-USnowDeformerComponent (per character)
-        │  traces each foot socket to the ground, reports presses this frame
-        ▼
-USnowDeformationSubsystem::Tick()          — game thread, once per world
-        │  1. moves the simulated region to follow the focus actor
-        │  2. converts contacts to FSnowDeformerGPU (region-local space)
-        │  3. ENQUEUE_RENDER_COMMAND → Dispatch_RenderThread
-        ▼
-SnowDeformation.usf                        — render thread, GPU
-        │  Pass 1 SnowAccumulateCS: reproject → refill → stamp deformers
-        │  Pass 2 SnowNormalsCS:    height field → RGBA (height + normal.xy)
-        ▼
-SnowData render target  →  snow material WPO + normal
+```mermaid title="Frame pipeline — game thread to GPU to material"
+flowchart LR
+    subgraph GT["Game thread"]
+        C["USnowDeformerComponent<br/>traces foot sockets"] --> S["SnowDeformationSubsystem<br/>moves region · packs contacts"]
+    end
+    subgraph GPU["Render thread · GPU"]
+        A["SnowAccumulateCS<br/>reproject → refill → stamp"] --> N["SnowNormalsCS<br/>height → RGBA"]
+    end
+    S -- "ENQUEUE_RENDER_COMMAND" --> A
+    N --> T[("SnowData<br/>render target")]
+    T --> MAT["Snow material<br/>WPO + normal"]
 ```
 
 ## A world-sized surface from a 1024² texture

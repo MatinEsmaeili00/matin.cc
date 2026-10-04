@@ -20,6 +20,7 @@ export function ProjectCard({
           slug={project.slug}
           cover={project.cover}
           preview={project.preview}
+          youtube={project.youtube}
           label={categoryLabels(project.categories)[0]}
           sizes={sizes}
         />

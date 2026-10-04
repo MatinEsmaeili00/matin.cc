@@ -47,7 +47,7 @@ export function FeaturedProject({ project, index }: { project: Project; index: n
           label={techLabels(project.tech, 3).join(" · ")}
           sizes="(min-width: 768px) 66vw, 100vw"
           priority={index === 0}
-          playback="inview"
+          youtube={project.youtube}
         />
       </Link>
 

@@ -10,6 +10,38 @@ The site is **data-driven**: every project is one MDX file. Pages, cards, filter
 redirects and structured data are all generated from those files. Never hand-build a page for a project.
 Matin edits content himself through the CMS; keep everything the CMS touches editable there.
 
+## Status & continuing on another computer (read this first)
+
+**Where things stand (last updated Oct 2026):** the site is complete and lives only on GitHub — it is
+**not deployed yet** (Matin has his own host and will deploy later; the old WordPress site is still live
+at matin.cc). 30 projects are migrated. Recent work: light HR-friendly theme with dark toggle, Keystatic
+CMS + /admin, homepage organised into the old site's sections plus "In the Lab", hover/scroll video
+previews everywhere, Mermaid-style architecture diagrams.
+
+**Set up a new machine:**
+
+```bash
+git clone https://github.com/MatinEsmaeili00/matin.cc.git && cd matin.cc
+npm install                 # also patches Keystatic (postinstall) and fetches ffmpeg
+gh auth login               # GitHub CLI — scripts use its token; add `--scopes workflow` to push Actions
+npm run dev                 # http://localhost:3000 · CMS /keystatic · dashboard /admin
+```
+
+Optional `.env.local` (see `.env.example`): `GITHUB_TOKEN`, `YOUTUBE_API_KEY`, `DEPLOY_HOOK_URL`.
+yt-dlp downloads itself into `.cache/` the first time `npm run media` gets a YouTube link.
+
+**Open items / next steps:**
+
+1. GitHub Actions are parked in `docs/github-workflows/` (pushing `.github/` needs the `workflow`
+   token scope) — see the README there to activate them.
+2. Deployment: when Matin names his host, check it runs Node.js (needed for next/image, redirects and
+   Keystatic GitHub mode); otherwise set up a static export (see Deployment below).
+3. Content Matin still owes (details in `docs/MIGRATION.md` §5): videos for Snow/Sand/GPULab/Building
+   Visualization/Robot Voice Control, résumé PDF + photo (CMS → Site settings), About page details,
+   unconfirmed roles (Robots & Humans, Sud Enforcer, Jewel Seeker), team-size conflicts.
+4. Matin's preferences: light, recruiter-friendly design (dark only via the toggle); **no scheduled
+   automation** — rebuilds/publishing happen only when he presses a button; he edits content himself.
+
 ## Sources of truth
 
 | Thing | Canonical source | Edited in |
@@ -17,7 +49,8 @@ Matin edits content himself through the CMS; keep everything the CMS touches edi
 | Case studies: role, contribution, technical writing | `content/projects/<slug>.mdx` | CMS → Projects, or by hand |
 | About page prose | `content/about.mdx` | CMS → About page |
 | Name, roles, intro, links, email, résumé, photo, showreel | `content/settings/site.json` (typed by `src/config/site.ts`) | CMS → Site settings |
-| Categories (disciplines), incl. "In the Lab" | `content/settings/categories.json` (read by `src/config/taxonomy.ts`) | CMS → Categories |
+| Categories (disciplines, used by /work filters) | `content/settings/categories.json` (read by `src/config/taxonomy.ts`) | CMS → Categories |
+| Homepage sections (title, order, blurb) | `content/settings/home.json` (read by `src/config/home.ts`) | CMS → Homepage |
 | Technology vocabulary (`tech` ids) | `TECH` in `src/config/taxonomy.ts` | code only |
 | Source code, repo description, stars, activity | GitHub | — fetched at build time |
 | Demo / long-form video | YouTube | — click-to-load players, titles via oEmbed |
@@ -43,15 +76,44 @@ code with `<GitHubCode>` rather than copying it when the repo is public.
 - The CMS rewrites frontmatter in its own YAML style (block lists, empty defaults like `videos: []`) —
   that's expected; `load.ts → clean()` treats `""`/`null` as unset.
 - Don't use MDX comments (`{/* */}`) in content files — the CMS editor can't parse them.
-- Verified behaviour: saving only rewrites files the entry references, so other media in
-  `public/media/<slug>/` (webm/poster siblings, clips) is never deleted.
+- Verified behaviour: saving only rewrites files the entry's own file fields reference, so other media
+  in `public/media/<slug>/` (webm/poster siblings, clips, piece media) is left alone.
+- **File-field naming rule:** Keystatic names uploads after the field and *renames* anything else on
+  save (deleting the original — this once broke a piece that shared the file). So `preview` must be
+  `…/preview.mp4` and `cover` must be `…/cover.<ext>`; `npm run validate` enforces it. Pieces and
+  gallery use plain path fields, so any name is fine there — never point `preview` at a piece's file.
+
+## Homepage, pieces, video previews, diagrams
+
+- **Homepage sections** mirror the old site: Developed Games & Tools · Virtual Production · In the Lab
+  ("Currently cooking" — work in progress, placed mid-page) · Math · Shaders. Each project picks ONE
+  with `homeSection:` (omit = only on /work). Inside a section, `tier: featured` projects get
+  full-width rows; everything else is a card; sections fold after 9 cards ("Show more"). A sticky
+  section bar (`components/home/section-nav.tsx`) highlights the section in view.
+- **Pieces** (`items:` in frontmatter) model collections — the studio productions, the shader set,
+  the vector-math demos. Each piece becomes its own homepage card linking to
+  `/work/<slug>#<piece-id>`, and the project page shows a "Pieces" grid (YouTube pieces open the full
+  player on click). Fields: `title`, `summary`, `youtube`, `media` (loop .mp4 or image), `tech`.
+- **Video previews play on hover (mouse) or when ~60% on screen (touch)** — never with reduced
+  motion or Save-Data. One hook decides: `components/media/use-preview-activation.ts`. Local muted
+  loops (`preview:` / piece `media`) are preferred; media that only exists on YouTube falls back to a
+  muted chrome-less embed (`youtube-hover-preview.tsx`), one at a time. Make a light loop from Matin's
+  own YouTube upload with:
+  `npm run media -- <slug> https://youtu.be/<id> --name preview --start 6 --duration 10 --crf 28 --no-webm`
+  (use the "Short" cut of a video when one exists — it's the best material; check the poster after).
+- **Architecture diagrams:** write a ```` ```mermaid title="…" ```` fence with Mermaid flowchart syntax
+  (copy straight from a README). `src/lib/diagram.ts` parses it and lays it out with dagre at build
+  time; `components/diagram/diagram.tsx` renders themed SVG with animated "data flow" edges, picking
+  LR or TB per screen size. Supported: flowchart/graph TB/TD/BT/LR/RL, shapes `[] () ([]) [()] {}
+  (()) [[]]`, edges `--> --- -.-> ==>` with `-- label -->` / `-->|label|`, chains, `&`, nested
+  subgraphs, `<br/>` in labels. Unparseable input falls back to a code block.
 
 ## Adding a project ("Add my X project — here's the repo and video")
 
 1. Scaffold it (non-interactive form — always use `--yes` so it never prompts):
    ```bash
    npm run new-project -- --title "Snow Deformation" --github MatinEsmaeili00/SnowDeformation \
-     --youtube https://youtu.be/VIDEOID --categories rendering,tools --year 2026 --tier project --yes
+     --youtube https://youtu.be/VIDEOID --categories rendering,tools --section lab --year 2026 --tier project --yes
    ```
    It pre-fills summary/year/tech from GitHub and the title from YouTube. Read the generated file.
 2. Read the repo README (`gh api repos/OWNER/REPO/readme -H "Accept: application/vnd.github.raw"`) and the
@@ -60,8 +122,10 @@ code with `<GitHubCode>` rather than copying it when the repo is public.
    (role, team size, year) isn't known, leave the field out and tell Matin.
 3. Pick `tech` ids only from `src/config/taxonomy.ts`; categories only from `categories.json`
    (`lab` = "In the Lab" — experiments and work in progress).
-4. Media: `npm run media -- <slug> <file> --name preview` for the card/hero loop (5–12 s),
-   `--name cover` for a still, plain file args for gallery items. Writes to `public/media/<slug>/`.
+4. Media: `npm run media -- <slug> <file-or-youtube-url> --name preview` for the card/hero loop
+   (5–12 s), `--name cover` for a still, plain file args for gallery items. Writes to
+   `public/media/<slug>/`. Every project with a video should get a local `preview` loop.
+   Pick `homeSection` (work in progress → `lab`).
 5. `npm run validate` — fix every error. Then `npm run build` if you changed components.
 6. Tier: `featured` only for Matin's strongest current work (homepage film-strip rows — keep it to ~6),
    `project` for solid work (homepage "Highlights" tab), `archive` for older work.
@@ -109,7 +173,7 @@ Keep excerpts short and explain them; never dump whole files.
 ```
 content/projects/*.mdx      project files (the source of truth)
 content/about.mdx           About page prose
-content/settings/*.json     site settings + categories (CMS-editable)
+content/settings/*.json     site settings · homepage sections · categories (CMS-editable)
 content/templates/          annotated project template
 content/audit-ignore.txt    repos/videos deliberately not on the site
 keystatic.config.ts         CMS definition
@@ -118,9 +182,9 @@ src/app/keystatic/, api/    CMS UI + API (gated by lib/cms.ts)
 src/app/admin/              local dashboard: check / publish / rebuild
 src/config/                 site.ts · taxonomy.ts · redirects.ts
 src/lib/content/            schema · load (plain Node, shared with scripts) · validate · projects (server) · mdx
-src/lib/github.ts, youtube.ts, highlight.ts, seo.tsx, og.tsx, cms.ts
-src/components/             layout/ · home/ · project/ · media/ · code/ · mdx/ · ui/
-scripts/                    validate · new-project · media · audit-sources · patch-keystatic
+src/lib/github.ts, youtube.ts, highlight.ts, seo.tsx, og.tsx, cms.ts, diagram.ts
+src/components/             layout/ · home/ · project/ · media/ · code/ · diagram/ · mdx/ · ui/
+scripts/                    validate · new-project · media (+ lib/ffmpeg, lib/yt-dlp) · audit-sources · patch-keystatic
 public/media/<slug>/        optimized media per project
 ```
 
@@ -128,7 +192,7 @@ public/media/<slug>/        optimized media per project
   calls on page load, no secrets reach the client.
 - **Rebuilds are manual** (Matin's choice — no schedule): Publish in /admin (if the host deploys from
   GitHub), "Rebuild live site" in /admin, or GitHub → Actions → "Rebuild site" (`.github/workflows/rebuild.yml`,
-  needs the `DEPLOY_HOOK_URL` repo secret).
+  needs the `DEPLOY_HOOK_URL` repo secret; currently parked in `docs/github-workflows/`).
 - Integrations never fail the build: GitHub/YouTube helpers return null and components fall back.
   Content errors *do* fail the build — `prebuild` runs `validate`.
 - `src/lib/content/load.ts` and `validate.ts` must stay free of Next/React imports (the CLI scripts use them).
@@ -138,10 +202,12 @@ public/media/<slug>/        optimized media per project
 ## Component conventions
 
 - **Server components by default.** Client components only where interaction needs it:
-  `youtube-player`, `preview-video`, `embed-facade`, `copy-button`, `mobile-nav`, `theme-toggle`,
-  `project-explorer`, `category-tabs`, `showreel`, `admin-forms`. Pass server-rendered nodes into
+  `youtube-player`, `preview-video`, `youtube-hover-preview`, `embed-facade`, `copy-button`,
+  `mobile-nav`, `theme-toggle`, `project-explorer`, `section-nav`, `expandable-grid`, `showreel`,
+  `admin-forms`. Pass server-rendered nodes into
   client components as props (explorer/tabs filter server-rendered cards).
-- Never load a YouTube iframe without a click. Grid/card motion = local muted MP4 previews only.
+- Card/grid motion = local muted MP4 loops; a muted YouTube embed only as a hover/on-screen fallback
+  (one at a time). Full YouTube players (with sound) load only on click.
 - No new UI dependencies without a reason; animation is CSS (scroll-driven `.reveal`, transform-only
   `animate-rise` above the fold) and the native View Transitions API. Respect `prefers-reduced-motion`.
 - Read copy from `site` (`src/config/site.ts`); never hardcode name, email or URLs in components.
@@ -176,7 +242,7 @@ public/media/<slug>/        optimized media per project
 npm run dev               # local site + CMS (/keystatic) + admin (/admin)
 npm run validate          # check all content (also runs before every build)
 npm run new-project -- …  # scaffold a project file (see above)
-npm run media -- <slug> <files> [--name preview|cover] [--start s --duration s]
+npm run media -- <slug> <files|youtube-urls> [--name preview|cover] [--start s --duration s]
 npm run audit:sources     # GitHub repos / YouTube uploads not yet on the site
 npm run check             # validate + typecheck + lint
 npm run build             # production build (locally: GITHUB_TOKEN=$(gh auth token) npm run build)
@@ -189,7 +255,8 @@ Host not chosen yet (Matin will deploy to his own host). Requirements: Node.js 2
 A purely static host would need `output: "export"`, `images.unoptimized`, and redirects moved to the
 host's config, and the CMS would stay local-only. Set `GITHUB_TOKEN` (and optionally `YOUTUBE_API_KEY`,
 `DEPLOY_HOOK_URL`) in the host's environment — see `.env.example`. Never commit tokens.
-CI (`.github/workflows/ci.yml`) runs validate, typecheck, lint and build on push/PR.
+CI (`ci.yml`: validate, typecheck, lint, build on push/PR) and the manual `rebuild.yml` are parked in
+`docs/github-workflows/` until a token with the `workflow` scope moves them into `.github/workflows/`.
 
 ## Migration notes
 

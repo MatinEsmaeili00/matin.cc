@@ -6,6 +6,7 @@
  *   About page     → content/about.mdx
  *   Site settings  → content/settings/site.json
  *   Categories     → content/settings/categories.json
+ *   Homepage       → content/settings/home.json (section titles + order)
  *
  * Every field here mirrors src/lib/content/schema.ts — keep them in sync when
  * adding a field. Uploaded media lands in public/media/<slug>/.
@@ -17,6 +18,7 @@
 import { collection, config, fields, singleton } from "@keystatic/core";
 import { block, wrapper } from "@keystatic/core/content-components";
 import categoryData from "./content/settings/categories.json";
+import homeData from "./content/settings/home.json";
 import { TECH } from "./src/config/taxonomy";
 import { STATUSES, TIERS } from "./src/lib/content/schema";
 
@@ -122,7 +124,7 @@ export default config({
     brand: { name: "matin.cc" },
     navigation: {
       Content: ["projects", "about"],
-      Settings: ["site", "categories"],
+      Settings: ["site", "home", "categories"],
     },
   },
 
@@ -167,6 +169,15 @@ export default config({
           description: "Edit the list under Settings → Categories.",
           options: categoryData.categories.map((c) => ({ value: c.id, label: c.label })),
         }),
+        homeSection: fields.select({
+          label: "Homepage section",
+          description: "Where this appears on the homepage. Edit sections under Settings → Homepage.",
+          options: [
+            { value: "", label: "— Not on the homepage (only in Work) —" },
+            ...homeData.sections.map((s) => ({ value: s.id, label: s.title })),
+          ],
+          defaultValue: "",
+        }),
         tech: fields.multiselect({
           label: "Technologies",
           options: Object.entries(TECH).map(([value, t]) => ({ value, label: t.label })),
@@ -202,6 +213,26 @@ export default config({
             caption: fields.text({ label: "Caption" }),
           }),
           { label: "Gallery", itemLabel: (p) => p.fields.caption.value || p.fields.src.value },
+        ),
+        items: fields.array(
+          fields.object({
+            title: fields.text({ label: "Title", validation: { isRequired: true } }),
+            summary: fields.text({ label: "One line", multiline: true }),
+            youtube: fields.text({ label: "YouTube URL or id", description: "Optional — plays when clicked on the project page" }),
+            media: fields.text({
+              label: "Loop or image path",
+              description: "e.g. /media/my-project/clip.mp4 (npm run media can make one from a YouTube link)",
+            }),
+            tech: fields.multiselect({
+              label: "Technologies",
+              options: Object.entries(TECH).map(([value, t]) => ({ value, label: t.label })),
+            }),
+          }),
+          {
+            label: "Pieces",
+            description: "For collections (a shader set, studio productions…): each piece gets its own card on the homepage.",
+            itemLabel: (p) => p.fields.title.value,
+          },
         ),
         highlights: fields.array(fields.text({ label: "Highlight" }), {
           label: "Highlights",
@@ -256,6 +287,27 @@ export default config({
         social: fields.array(
           fields.object({ label: fields.text({ label: "Label" }), href: fields.text({ label: "URL" }) }),
           { label: "Links (footer, About page)", itemLabel: (p) => p.fields.label.value },
+        ),
+      },
+    }),
+
+    home: singleton({
+      label: "Homepage",
+      path: "content/settings/home",
+      format: { data: "json" },
+      schema: {
+        sections: fields.array(
+          fields.object({
+            id: fields.text({
+              label: "Id",
+              description: "Used in links (/#id) and by each project's Homepage section. Don't rename ids projects use.",
+              validation: { isRequired: true, pattern: SLUG_PATTERN },
+            }),
+            title: fields.text({ label: "Title", validation: { isRequired: true } }),
+            eyebrow: fields.text({ label: "Small label above the title", description: "e.g. Currently cooking" }),
+            blurb: fields.text({ label: "One-line description", multiline: true }),
+          }),
+          { label: "Sections (in display order)", itemLabel: (p) => p.fields.title.value },
         ),
       },
     }),

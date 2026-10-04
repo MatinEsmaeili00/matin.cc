@@ -43,8 +43,8 @@ Nothing was silently deleted: every old URL either has a new home or redirects s
 | `sam3-quest-segmentation` | GitHub `sam3-unity` (new) |
 | `particle-morphing-system` | `/particle-morphing-system` (+ `/pu`) |
 | `ultrasound-procedure` | `/ultrasound-procedure` (+ `/usp`) |
-| `unity-shader-collection` | Homepage "Shaders" section (5 cards) + GitHub `Unity5-ShaderShowcase` — **merged** |
-| `virtual-production-lsu` | Homepage "Virtual Production" section (9 cards) — **merged into one case study** |
+| `unity-shader-collection` | Homepage "Shaders" section (5 cards) + GitHub `Unity5-ShaderShowcase` — one case study, 5 **pieces** shown as cards |
+| `virtual-production-lsu` | Homepage "Virtual Production" section (9 cards) — one case study whose 9 **pieces** are again individual cards on the homepage |
 | `muchi` | `/muchi` |
 | `no-surprises` | `/no-surprises` |
 | `sud-enforcer` | `/sud-enforcer` (+ typo duplicate `/sub-enforcer`) |

@@ -10,6 +10,7 @@
  * integrations and SEO.
  */
 import { z } from "zod";
+import { HOME_SECTION_IDS } from "@/config/home";
 import { CATEGORY_IDS, TECH, TECH_IDS, isTechId, type TechId } from "@/config/taxonomy";
 import { parseGitHubRepo, parseYouTubeId } from "@/lib/refs";
 
@@ -78,6 +79,8 @@ export const projectFrontmatterSchema = z
     priority: z.number().default(0),
 
     categories: z.array(z.enum(CATEGORY_IDS)).min(1, "list at least one category"),
+    /** Which homepage section shows this project (content/settings/home.json). Omit = only on /work. */
+    homeSection: z.enum(HOME_SECTION_IDS).optional(),
     tech: z.array(techRef).default([]),
 
     /** Your role in your own words, e.g. "Solo developer" or "Rendering engineer". */
@@ -121,6 +124,27 @@ export const projectFrontmatterSchema = z
             src: mediaSrc,
             alt: z.string().min(1, "describe the image for screen readers"),
             caption: z.string().optional(),
+          })
+          .strict(),
+      )
+      .default([]),
+
+    /**
+     * Pieces: individual works inside a collection (a shader set, studio
+     * productions…). Each shows as its own card on the homepage and in a
+     * "Pieces" grid on the project page.
+     */
+    items: z
+      .array(
+        z
+          .object({
+            title: z.string().min(1),
+            summary: z.string().optional(),
+            /** YouTube video for this piece (click to play on the project page). */
+            youtube: youtubeRef.optional(),
+            /** Local loop (.mp4) or image. A .jpg poster sibling is used for loops. */
+            media: mediaSrc.optional(),
+            tech: z.array(techRef).default([]),
           })
           .strict(),
       )

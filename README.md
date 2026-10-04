@@ -5,10 +5,16 @@ simulation developer.
 
 Next.js 16 · React 19 · TypeScript · Tailwind CSS 4 · MDX · Keystatic CMS.
 
-Every project is a single file in `content/projects/`. The site builds the case-study page, cards,
-category tabs, filters, sitemap, social images and redirects from it, and pulls live data from
+Every project is a single file in `content/projects/`. The site builds the case-study page, the
+homepage sections (Developed Games & Tools · Virtual Production · In the Lab · Math · Shaders),
+filters, sitemap, social images and redirects from it, and pulls live data from
 GitHub and video from YouTube — so the portfolio, GitHub and YouTube never have to be kept in sync
 by hand.
+
+## Continuing on another computer
+
+Clone, `npm install`, `gh auth login`, `npm run dev` — the full checklist and current status are at
+the top of [CLAUDE.md](CLAUDE.md). Open Claude Code in the folder and it picks up from there.
 
 ## Editing the site (no code needed)
 
@@ -35,8 +41,9 @@ The editor and dashboard only exist on your computer — on the live site those 
 # scaffold from the repo + video (interactive if you leave flags out)
 npm run new-project -- --github MatinEsmaeili00/MyRepo --youtube https://youtu.be/VIDEOID
 
-# turn a screen capture into a card/hero loop (+ webm + poster)
+# turn a screen capture — or your own YouTube video — into a hover-preview loop
 npm run media -- my-repo ~/Captures/demo.mp4 --name preview --start 2 --duration 8
+npm run media -- my-repo https://youtu.be/VIDEOID --name preview --start 6 --duration 10
 ```
 
 `npm run audit:sources` lists GitHub repos and YouTube uploads that aren't on the site yet.

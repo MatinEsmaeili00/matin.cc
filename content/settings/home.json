@@ -1,0 +1,34 @@
+{
+  "sections": [
+    {
+      "id": "games-tools",
+      "title": "Developed Games & Tools",
+      "eyebrow": "",
+      "blurb": "Shipped games, digital twins and training simulations — and the systems and plugins behind them."
+    },
+    {
+      "id": "virtual-production",
+      "title": "Virtual Production",
+      "eyebrow": "",
+      "blurb": "LED-wall content, live interactive backgrounds, motion capture and studio work at LSU XR Studio."
+    },
+    {
+      "id": "lab",
+      "title": "In the Lab",
+      "eyebrow": "Currently cooking",
+      "blurb": "What I'm building right now — GPU simulation in Unreal, engine-driven robotics and experiments still in progress."
+    },
+    {
+      "id": "math",
+      "title": "Math",
+      "eyebrow": "",
+      "blurb": "Small studies in the vector maths and numerical methods behind real-time graphics."
+    },
+    {
+      "id": "shaders",
+      "title": "Shaders",
+      "eyebrow": "",
+      "blurb": "Hand-written shaders — vertex displacement, distortion, stencils, foliage and snow."
+    }
+  ]
+}

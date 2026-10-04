@@ -5,25 +5,34 @@ year: 2024
 status: shipped
 tier: project
 priority: 40
-categories: [technical-art, rendering, shaders, lab]
+categories: [technical-art, rendering, shaders]
+homeSection: shaders
 tech: [unity, hlsl, shaderlab, stencil-buffer]
 role: Solo developer
 teamSize: 1
 github: MatinEsmaeili00/Unity5-ShaderShowcase
 preview: /media/unity-shader-collection/preview.mp4
-gallery:
-  - src: /media/unity-shader-collection/displacement.mp4
-    alt: A plane rippling with concentric waves produced in the vertex shader.
-    caption: Displacement — radial waves computed in the vertex shader
-  - src: /media/unity-shader-collection/explosion.mp4
-    alt: A distortion wave expanding outwards from a point.
-    caption: Explosion wave — expanding distortion
-  - src: /media/unity-shader-collection/plants.mp4
-    alt: Side-by-side foliage rendered with alpha blending and with alpha clipping.
-    caption: Plants — alpha blending vs alpha clipping
-  - src: /media/unity-shader-collection/snow-on-top.mp4
-    alt: Objects whose upward-facing surfaces turn white like settled snow, with an adjustable blend band.
-    caption: Snow on top — world-normal mask with an inverse-lerp blend range
+items:
+  - title: Nested stencil layers
+    summary: Multi-layer stencil transitions — an outer layer masks collectibles, an inner layer reveals them.
+    media: /media/unity-shader-collection/preview.mp4
+    tech: [unity, shaderlab, stencil-buffer]
+  - title: Displacement
+    summary: Radial cosine waves computed in the vertex shader.
+    media: /media/unity-shader-collection/displacement.mp4
+    tech: [unity, hlsl, shaderlab]
+  - title: Explosion wave
+    summary: A distortion wave expanding outwards from a centre point.
+    media: /media/unity-shader-collection/explosion.mp4
+    tech: [unity, hlsl, shaderlab]
+  - title: Plants — blending vs clipping
+    summary: Alpha blending versus alpha clipping for foliage, side by side.
+    media: /media/unity-shader-collection/plants.mp4
+    tech: [unity, hlsl, shaderlab]
+  - title: Snow on top
+    summary: Upward-facing surfaces turn white, with an inverse-lerp blend band between two thresholds.
+    media: /media/unity-shader-collection/snow-on-top.mp4
+    tech: [unity, hlsl, shaderlab]
 ---
 
 ## Overview

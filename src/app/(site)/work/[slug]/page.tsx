@@ -6,6 +6,7 @@ import { getMDXComponents } from "@/components/mdx/mdx-components";
 import { ProjectMedia } from "@/components/media/project-media";
 import { categoryLabels, STATUS_LABEL } from "@/components/project/format";
 import { Gallery } from "@/components/project/gallery";
+import { PieceGrid } from "@/components/project/item-card";
 import { Metrics } from "@/components/project/metrics";
 import { ProjectFacts } from "@/components/project/project-facts";
 import { ProjectHeroMedia } from "@/components/project/project-hero-media";
@@ -107,6 +108,12 @@ export default async function ProjectPage(props: PageProps<"/work/[slug]">) {
         </div>
       )}
 
+      {project.items.length > 0 && (
+        <Section title="Pieces" count={project.items.length}>
+          <PieceGrid items={project.items} />
+        </Section>
+      )}
+
       {content && (
         <div className="page gutter mt-16 grid gap-10 md:mt-24 lg:grid-cols-12">
           <aside className="hidden lg:col-span-3 lg:block">
@@ -146,7 +153,7 @@ export default async function ProjectPage(props: PageProps<"/work/[slug]">) {
               <p className="mt-3 text-fg-muted">{next.summary}</p>
             </div>
             <div className="md:col-span-5 md:col-start-8">
-              <ProjectMedia slug={next.slug} cover={next.cover} preview={next.preview} sizes="(min-width: 768px) 40vw, 100vw" />
+              <ProjectMedia slug={next.slug} cover={next.cover} preview={next.preview} youtube={next.youtube} sizes="(min-width: 768px) 40vw, 100vw" />
             </div>
           </Link>
         </nav>

@@ -6,6 +6,7 @@ import type { VideoAsset } from "@/lib/content/projects";
 import { Play } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 import { PreviewVideo } from "./preview-video";
+import { YouTubeHoverPreview } from "./youtube-hover-preview";
 
 type Poster = { src: string; width: number; height: number };
 
@@ -78,7 +79,7 @@ export function YouTubePlayer({
             sizes={sizes}
             className="object-cover transition-transform duration-700 ease-out-expo group-hover:scale-[1.015]"
           />
-          {preview && <PreviewVideo video={preview} mode="inview" />}
+          {preview ? <PreviewVideo video={preview} /> : <YouTubeHoverPreview id={id} />}
           <span
             aria-hidden
             className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-80 transition-opacity group-hover:opacity-100"

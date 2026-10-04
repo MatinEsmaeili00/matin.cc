@@ -1,6 +1,7 @@
 import "server-only";
 import path from "node:path";
 import { cache } from "react";
+import GithubSlugger from "github-slugger";
 import { imageSizeFromFile } from "image-size/fromFile";
 import type { CategoryId, TechId } from "@/config/taxonomy";
 import { getYouTubeThumbnail } from "@/lib/youtube";
@@ -24,7 +25,21 @@ export type GalleryItem =
   | ({ kind: "image"; caption?: string } & ImageAsset)
   | ({ kind: "video"; alt: string; caption?: string } & VideoAsset);
 
-export type Project = Omit<ProjectFrontmatter, "cover" | "preview" | "gallery"> & {
+/** A piece inside a collection project (shown as its own card on the homepage). */
+export type ProjectItem = {
+  /** Anchor on the project page: /work/<slug>#<id> */
+  id: string;
+  title: string;
+  summary: string | null;
+  youtube: string | null;
+  tech: TechId[];
+  /** Local loop, if any. */
+  video: VideoAsset | null;
+  /** Still: local image, loop poster, or YouTube thumbnail. */
+  image: ImageAsset | null;
+};
+
+export type Project = Omit<ProjectFrontmatter, "cover" | "preview" | "gallery" | "items"> & {
   slug: string;
   url: string;
   body: string;
@@ -34,6 +49,7 @@ export type Project = Omit<ProjectFrontmatter, "cover" | "preview" | "gallery"> 
   cover: ImageAsset | null;
   preview: VideoAsset | null;
   gallery: GalleryItem[];
+  items: ProjectItem[];
 };
 
 /** The subset sent to client components (the Work explorer). */
@@ -50,6 +66,8 @@ export type ProjectSummary = {
   tech: TechId[];
   cover: ImageAsset | null;
   preview: VideoAsset | null;
+  /** Main YouTube video — fallback hover preview when there's no local loop. */
+  youtube: string | null;
 };
 
 const VIDEO_EXT = /\.(mp4|webm|mov)$/i;
@@ -83,6 +101,7 @@ export function toSummary(p: Project): ProjectSummary {
     tech: p.tech,
     cover: p.cover,
     preview: p.preview,
+    youtube: p.youtube ?? null,
   };
 }
 
@@ -125,7 +144,8 @@ async function resolveProject(raw: RawProject): Promise<Project> {
     )
   ).filter((g): g is GalleryItem => g !== null);
 
-  const cover = await resolveCover(raw, preview, gallery);
+  const items = await resolveItems(raw);
+  const cover = (await resolveCover(raw, preview, gallery)) ?? items.find((i) => i.image)?.image ?? null;
 
   return {
     ...data,
@@ -136,7 +156,34 @@ async function resolveProject(raw: RawProject): Promise<Project> {
     cover,
     preview,
     gallery,
+    items,
   };
+}
+
+async function resolveItems(raw: RawProject): Promise<ProjectItem[]> {
+  const slugger = new GithubSlugger();
+  return Promise.all(
+    raw.data.items.map(async (item): Promise<ProjectItem> => {
+      let video: VideoAsset | null = null;
+      let image: ImageAsset | null = null;
+      if (item.media && VIDEO_EXT.test(item.media)) {
+        video = resolveVideo(raw, item.media);
+        if (video?.poster) image = await resolveImage(raw, video.poster, item.title);
+      } else if (item.media) {
+        image = await resolveImage(raw, item.media, item.title);
+      }
+      if (!image && item.youtube) image = { ...(await getYouTubeThumbnail(item.youtube)), alt: item.title };
+      return {
+        id: slugger.slug(item.title),
+        title: item.title,
+        summary: item.summary ?? null,
+        youtube: item.youtube ?? null,
+        tech: item.tech,
+        video,
+        image,
+      };
+    }),
+  );
 }
 
 async function resolveCover(

@@ -1,10 +1,11 @@
 /**
- * npm run media -- <slug> <file...> [options]
+ * npm run media -- <slug> <file-or-youtube...> [options]
  *
- * Turns raw captures into web-ready project media in public/media/<slug>/:
+ * Turns raw captures — or your own YouTube uploads — into web-ready project
+ * media in public/media/<slug>/:
  *
- *   video / GIF  →  <name>.mp4 + <name>.webm + <name>.jpg (poster)
- *   image        →  <name>.jpg (max 2000px wide)
+ *   video / GIF / YouTube  →  <name>.mp4 + <name>.webm + <name>.jpg (poster)
+ *   image                  →  <name>.jpg (max 2000px wide)
  *
  * Then prints the frontmatter to paste into content/projects/<slug>.mdx.
  *
@@ -19,17 +20,23 @@
  *
  * Examples
  *   npm run media -- snow-deformation ~/Captures/snow.mp4 --name preview --start 3 --duration 8
+ *   npm run media -- verocity https://youtu.be/47iKEov1gcM --name preview --start 4 --duration 8
  *   npm run media -- snow-deformation shot1.png shot2.png
+ *
+ * YouTube inputs use yt-dlp (downloaded automatically on first use). Only use
+ * this for videos you own.
  */
 import fs from "node:fs";
 import path from "node:path";
 import { parseArgs } from "node:util";
+import { parseYouTubeId } from "../src/lib/refs";
 import { fileSizeKB, IMAGE_INPUT, transcodeImage, transcodeVideo, VIDEO_INPUT } from "./lib/ffmpeg";
+import { downloadYouTube } from "./lib/yt-dlp";
 
-const HELP = `Usage: npm run media -- <slug> <file...> [--name preview] [--start s] [--duration s] [--width px] [--no-webm]
+const HELP = `Usage: npm run media -- <slug> <file-or-youtube-url...> [--name preview] [--start s] [--duration s] [--width px] [--no-webm]
 
-  video / GIF  →  public/media/<slug>/<name>.mp4 + .webm + .jpg poster
-  image        →  public/media/<slug>/<name>.jpg
+  video / GIF / YouTube  →  public/media/<slug>/<name>.mp4 + .webm + .jpg poster
+  image                  →  public/media/<slug>/<name>.jpg
 
 Use --name preview for the card/hero loop and --name cover for the cover image.`;
 
@@ -47,70 +54,83 @@ const { values, positionals } = parseArgs({
   },
 });
 
-const [slug, ...inputs] = positionals;
+async function main() {
+  const [slug, ...inputs] = positionals;
 
-if (values.help || !slug || inputs.length === 0) {
-  console.log(HELP);
-  process.exit(values.help ? 0 : 1);
-}
-if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
-  console.error(`"${slug}" isn't a valid slug — use the project's filename, e.g. snow-deformation`);
-  process.exit(1);
-}
-if (values.name && inputs.length > 1) {
-  console.error("--name only works with a single input file");
-  process.exit(1);
-}
-
-const outDir = path.join(process.cwd(), "public", "media", slug);
-const publicPath = (file: string) => `/media/${slug}/${path.basename(file)}`;
-const snippets: string[] = [];
-
-for (const input of inputs) {
-  if (!fs.existsSync(input)) {
-    console.error(`✗ ${input}: file not found`);
-    continue;
+  if (values.help || !slug || inputs.length === 0) {
+    console.log(HELP);
+    process.exit(values.help ? 0 : 1);
   }
-  const name = values.name ?? sanitize(path.parse(input).name);
-  const base = path.join(outDir, name);
-
-  if (VIDEO_INPUT.test(input)) {
-    process.stdout.write(`▸ ${path.basename(input)} → ${name}.{mp4,webm,jpg} … `);
-    transcodeVideo(input, base, {
-      width: values.width ? Number(values.width) : undefined,
-      start: values.start ? Number(values.start) : undefined,
-      duration: values.duration ? Number(values.duration) : undefined,
-      crf: values.crf ? Number(values.crf) : undefined,
-      fps: values.fps ? Number(values.fps) : undefined,
-      noWebm: values["no-webm"],
-    });
-    const webm = fs.existsSync(`${base}.webm`) ? `, webm ${fileSizeKB(`${base}.webm`)} KB` : "";
-    console.log(`mp4 ${fileSizeKB(`${base}.mp4`)} KB${webm}`);
-    snippets.push(
-      name === "preview"
-        ? `preview: ${publicPath(`${base}.mp4`)}`
-        : `  - src: ${publicPath(`${base}.mp4`)}\n    alt: TODO describe this clip`,
-    );
-  } else if (IMAGE_INPUT.test(input)) {
-    const out = `${base}.jpg`;
-    process.stdout.write(`▸ ${path.basename(input)} → ${name}.jpg … `);
-    transcodeImage(input, out, values.width ? Number(values.width) : undefined);
-    console.log(`${fileSizeKB(out)} KB`);
-    snippets.push(
-      name === "cover"
-        ? `cover: ${publicPath(out)}`
-        : `  - src: ${publicPath(out)}\n    alt: TODO describe this image`,
-    );
-  } else {
-    console.error(`✗ ${input}: unsupported file type`);
+  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
+    console.error(`"${slug}" isn't a valid slug — use the project's filename, e.g. snow-deformation`);
+    process.exit(1);
   }
-}
+  if (values.name && inputs.length > 1) {
+    console.error("--name only works with a single input file");
+    process.exit(1);
+  }
 
-if (snippets.length) {
-  console.log(`\nAdd to content/projects/${slug}.mdx:\n`);
-  const top = snippets.filter((s) => !s.startsWith("  -"));
-  const gallery = snippets.filter((s) => s.startsWith("  -"));
-  console.log([...top, ...(gallery.length ? ["gallery:", ...gallery] : [])].join("\n"));
+  const outDir = path.join(process.cwd(), "public", "media", slug);
+  const publicPath = (file: string) => `/media/${slug}/${path.basename(file)}`;
+  const start = values.start ? Number(values.start) : undefined;
+  const duration = values.duration ? Number(values.duration) : undefined;
+  const snippets: string[] = [];
+
+  for (const raw of inputs) {
+    let input = raw;
+    let trimmed = false;
+    const youtubeId = fs.existsSync(raw) ? null : parseYouTubeId(raw);
+
+    if (youtubeId) {
+      process.stdout.write(`▸ YouTube ${youtubeId} → downloading${start !== undefined || duration !== undefined ? " section" : ""} … `);
+      input = await downloadYouTube(youtubeId, path.join(process.cwd(), ".cache", "youtube"), { start, duration });
+      trimmed = true;
+      console.log("done");
+    } else if (!fs.existsSync(raw)) {
+      console.error(`✗ ${raw}: file not found (and not a YouTube URL)`);
+      continue;
+    }
+
+    const name = values.name ?? sanitize(youtubeId ?? path.parse(input).name);
+    const base = path.join(outDir, name);
+
+    if (VIDEO_INPUT.test(input)) {
+      process.stdout.write(`▸ ${path.basename(input)} → ${name}.{mp4,webm,jpg} … `);
+      transcodeVideo(input, base, {
+        width: values.width ? Number(values.width) : undefined,
+        // A YouTube section is already cut; only keep the length cap.
+        start: trimmed ? undefined : start,
+        duration,
+        crf: values.crf ? Number(values.crf) : undefined,
+        fps: values.fps ? Number(values.fps) : undefined,
+        noWebm: values["no-webm"],
+      });
+      const webm = fs.existsSync(`${base}.webm`) ? `, webm ${fileSizeKB(`${base}.webm`)} KB` : "";
+      console.log(`mp4 ${fileSizeKB(`${base}.mp4`)} KB${webm}`);
+      snippets.push(
+        name === "preview"
+          ? `preview: ${publicPath(`${base}.mp4`)}`
+          : `  - src: ${publicPath(`${base}.mp4`)}\n    alt: TODO describe this clip`,
+      );
+    } else if (IMAGE_INPUT.test(input)) {
+      const out = `${base}.jpg`;
+      process.stdout.write(`▸ ${path.basename(input)} → ${name}.jpg … `);
+      transcodeImage(input, out, values.width ? Number(values.width) : undefined);
+      console.log(`${fileSizeKB(out)} KB`);
+      snippets.push(
+        name === "cover" ? `cover: ${publicPath(out)}` : `  - src: ${publicPath(out)}\n    alt: TODO describe this image`,
+      );
+    } else {
+      console.error(`✗ ${raw}: unsupported file type`);
+    }
+  }
+
+  if (snippets.length) {
+    console.log(`\nAdd to content/projects/${slug}.mdx:\n`);
+    const top = snippets.filter((s) => !s.startsWith("  -"));
+    const gallery = snippets.filter((s) => s.startsWith("  -"));
+    console.log([...top, ...(gallery.length ? ["gallery:", ...gallery] : [])].join("\n"));
+  }
 }
 
 function sanitize(name: string): string {
@@ -122,3 +142,8 @@ function sanitize(name: string): string {
       .replace(/^-+|-+$/g, "") || "media"
   );
 }
+
+main().catch((error) => {
+  console.error(`✗ ${(error as Error).message}`);
+  process.exit(1);
+});

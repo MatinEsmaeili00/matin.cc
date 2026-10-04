@@ -1,0 +1,26 @@
+# A manual "Rebuild site" button: GitHub → Actions → Rebuild site → Run workflow.
+# Asks your host to rebuild the live site (e.g. to refresh GitHub stars and
+# video titles) without changing any content. Nothing runs automatically.
+#
+# Setup (once): copy your host's deploy/build hook URL into
+# GitHub → repo → Settings → Secrets and variables → Actions →
+# New repository secret: DEPLOY_HOOK_URL
+name: Rebuild site
+
+on:
+  workflow_dispatch:
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger the host's deploy hook
+        env:
+          HOOK: ${{ secrets.DEPLOY_HOOK_URL }}
+        run: |
+          if [ -z "$HOOK" ]; then
+            echo "::error::Add your host's deploy hook URL as the DEPLOY_HOOK_URL repository secret first."
+            exit 1
+          fi
+          curl -fsS -X POST "$HOOK"
+          echo "Rebuild requested."

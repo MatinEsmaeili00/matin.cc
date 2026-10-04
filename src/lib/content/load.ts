@@ -121,6 +121,9 @@ export function localMediaRefs(data: ProjectFrontmatter): { field: string; src: 
   data.gallery.forEach((g, i) => {
     if (g.src.startsWith("/")) refs.push({ field: `gallery.${i}.src`, src: g.src });
   });
+  data.items.forEach((item, i) => {
+    if (item.media?.startsWith("/")) refs.push({ field: `items.${i}.media`, src: item.media });
+  });
   return refs;
 }
 

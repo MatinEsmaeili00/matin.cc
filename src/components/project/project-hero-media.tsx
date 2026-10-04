@@ -31,13 +31,13 @@ export async function ProjectHeroMedia({ project }: { project: Project }) {
   }
 
   return (
-    <div className="relative aspect-video w-full overflow-hidden bg-ink-2">
+    <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-ink-2" data-preview-root>
       {project.cover ? (
         <Image src={project.cover.src} alt={project.cover.alt} fill priority sizes={SIZES} className="object-cover" />
       ) : (
         <ProceduralCover seed={project.slug} label={techLabels(project.tech, 4).join(" · ")} />
       )}
-      {project.preview && <PreviewVideo video={project.preview} mode="inview" />}
+      {project.preview && <PreviewVideo video={project.preview} />}
     </div>
   );
 }

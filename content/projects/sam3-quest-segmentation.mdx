@@ -6,6 +6,7 @@ status: prototype
 tier: project
 priority: 50
 categories: [xr, robotics, research, lab]
+homeSection: lab
 tech: [unity, csharp, python, ar, meta-quest, computer-vision, docker]
 role: Solo developer
 teamSize: 1
@@ -21,10 +22,17 @@ highlights:
 
 Mixed reality gets much more useful when the headset understands what it's looking at. This project streams the **Meta Quest 3 passthrough camera** from a Unity app to Meta's **Segment Anything Model 3** running on a GPU machine on the local network, and draws the returned masks over the user's view. Ask for `"cup"` or `"keyboard"` and every matching object comes back with a mask, a bounding box and a confidence score.
 
-```text title="Pipeline" nolines
-Quest 3 (Unity)                                   GPU machine (Docker)
-passthrough camera → JPEG ─── ws://IP:8765/ws ──► SAM 3 image model
-RawImage overlay  ◄── mask PNG + boxes/scores ─── (one frame at a time)
+```mermaid title="Pipeline — headset to GPU and back"
+flowchart LR
+    subgraph QUEST["Quest 3 · Unity"]
+        CAM["Passthrough camera"] --> JPG["JPEG frame"]
+        OV["RawImage overlay"]
+    end
+    subgraph GPU["GPU machine · Docker"]
+        SAM["SAM 3 image model"]
+    end
+    JPG -- "ws://IP:8765/ws" --> SAM
+    SAM -- "mask PNG + boxes, scores" --> OV
 ```
 
 ## Pieces

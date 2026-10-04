@@ -3,9 +3,10 @@ title: Sand Deformation
 summary: GPU sand for UE 5.8 that slumps at its angle of repose, rings with wave-equation ripples on impact and throws grains when you land.
 year: 2026
 status: active
-tier: featured
+tier: project
 priority: 95
-categories: [rendering, tools, math, shaders]
+categories: [rendering, tools, math, shaders, lab]
+homeSection: lab
 tech: [unreal, cpp, hlsl, compute-shaders, rdg, gpu-simulation, niagara, materials]
 role: Solo developer
 teamSize: 1
@@ -47,11 +48,19 @@ The height convention flip matters: "material flows downhill" is only simple to 
 
 Everything lives in one RGBA32F texture, ping-ponged between frames: `R` is the persistent height, `G` the transient ripple height, `B` the ripple velocity and `A` a decaying disturbance mask that drives material effects. A second pass combines static and ripple height into normals for the material.
 
-```text title="Pass 1 · SandSimulateCS" nolines
-reproject last frame into this frame's region
-slump  — collapse slopes past the angle of repose
-ripple — integrate the 2D wave equation (sub-stepped)
-stamp  — press craters, pile rims, kick the wave field
+```mermaid title="One frame of sand — two compute passes"
+flowchart LR
+    subgraph P1["Pass 1 · SandSimulateCS"]
+        R["Reproject<br/>last frame → region"] --> SL["Slump<br/>angle of repose"]
+        SL --> W["Ripple<br/>wave equation ×4"]
+        W --> ST["Stamp<br/>craters · rims · kicks"]
+    end
+    subgraph P2["Pass 2 · SandNormalsCS"]
+        N["static + ripple<br/>→ normals"]
+    end
+    ST --> N
+    N --> T[("SandData<br/>render target")]
+    T --> M["Sand material"]
 ```
 
 ## Slumping at the angle of repose

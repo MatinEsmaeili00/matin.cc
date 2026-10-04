@@ -11,13 +11,14 @@
  *     --categories rendering,tools --tech unreal,cpp,hlsl --year 2026 --yes
  *
  * Flags: --title --slug --summary --github --youtube --year --status --tier
- *        --categories --tech --role --team --context --steam --itch
+ *        --categories --section --tech --role --team --context --steam --itch
  *        --yes (accept defaults, never prompt)  --force (overwrite)
  */
 import fs from "node:fs";
 import path from "node:path";
 import { createInterface } from "node:readline/promises";
 import { parseArgs } from "node:util";
+import { HOME_SECTIONS, HOME_SECTION_IDS } from "../src/config/home";
 import { CATEGORIES, CATEGORY_IDS, TECH, isTechId } from "../src/config/taxonomy";
 import { PROJECTS_DIR } from "../src/lib/content/load";
 import { parseGitHubRepo, parseYouTubeId } from "../src/lib/refs";
@@ -35,6 +36,7 @@ const { values: flags } = parseArgs({
     status: { type: "string" },
     tier: { type: "string" },
     categories: { type: "string" },
+    section: { type: "string" },
     tech: { type: "string" },
     role: { type: "string" },
     team: { type: "string" },
@@ -124,6 +126,11 @@ async function main() {
   const badTech = tech.filter((t) => !isTechId(t));
   if (badTech.length) fail(`unknown tech: ${badTech.join(", ")} — see src/config/taxonomy.ts`);
 
+  if (rl) console.log(`
+Homepage sections: ${HOME_SECTIONS.map((s) => `${s.id} (${s.title})`).join(", ")}`);
+  const section = flags.section ?? (await ask("Homepage section (blank = only in Work)", "lab"));
+  if (section && !(HOME_SECTION_IDS as string[]).includes(section)) fail(`unknown homepage section "${section}" — one of: ${HOME_SECTION_IDS.join(", ")}`);
+
   const tier = flags.tier ?? (await ask(`Tier (${TIERS.join(" | ")})`, "project"));
   const status = flags.status ?? (await ask(`Status (${STATUSES.join(" | ")})`, "active"));
   const role = flags.role ?? (await ask("Your role", "Solo developer"));
@@ -141,6 +148,7 @@ async function main() {
     `status: ${status}`,
     `tier: ${tier}`,
     `categories: [${categories.join(", ")}]`,
+    section && `homeSection: ${section}`,
     `tech: [${tech.join(", ")}]`,
     role && `role: ${yaml(role)}`,
     team && `teamSize: ${Number(team)}`,

@@ -4,6 +4,7 @@ import type { MDXComponents } from "mdx/types";
 import { isValidElement, type ComponentPropsWithoutRef, type ReactElement, type ReactNode } from "react";
 import { imageSizeFromFile } from "image-size/fromFile";
 import { CodeBlock } from "@/components/code/code-block";
+import { Diagram } from "@/components/diagram/diagram";
 import { GitHubCode } from "@/components/code/github-code";
 import { EmbedFacade } from "@/components/media/embed-facade";
 import { PreviewVideo } from "@/components/media/preview-video";
@@ -64,6 +65,7 @@ function Pre({ children }: ComponentPropsWithoutRef<"pre">) {
   const code = children as ReactElement<CodeElementProps>;
   const lang = code.props.className?.match(/language-([\w#+-]+)/)?.[1];
   const meta = parseMeta(code.props.metastring);
+  if (lang === "mermaid") return <Diagram source={String(code.props.children ?? "")} title={meta.title} />;
   return (
     <CodeBlock
       code={String(code.props.children ?? "")}
@@ -115,10 +117,10 @@ function Clip({ src, caption, alt }: { src: string; caption?: string; alt?: stri
     poster: publicFileExists(poster) ? poster : null,
   };
   return (
-    <figure className="not-prose my-10">
+    <figure className="not-prose my-10" data-preview-root>
       <div className="relative aspect-video overflow-hidden rounded-lg bg-ink-3" role="img" aria-label={alt ?? caption ?? ""}>
         {video.poster && <Image src={video.poster} alt="" fill sizes="(min-width: 1024px) 800px, 100vw" className="object-cover" />}
-        <PreviewVideo video={video} mode="inview" />
+        <PreviewVideo video={video} />
       </div>
       {caption && <Caption>{caption}</Caption>}
     </figure>

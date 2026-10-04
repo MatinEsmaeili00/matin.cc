@@ -5,17 +5,24 @@ year: 2021
 status: prototype
 tier: archive
 categories: [math]
+homeSection: math
 tech: [unity, csharp]
 role: Solo developer
 teamSize: 1
 preview: /media/vector-math-experiments/preview.mp4
-gallery:
-  - src: /media/vector-math-experiments/dot-product-sight.mp4
-    alt: Unity scene view of a gizmo showing an object's facing direction and view angle as it rotates relative to a target marker
-    caption: Dot product, used to tell whether something is in view
-  - src: /media/vector-math-experiments/cross-product-frame.mp4
-    alt: Unity scene view of spheres arranged around a moving marker in a coordinate system built with cross products, as it travels over a cube and a sphere
-    caption: A coordinate system built from cross products
+items:
+  - title: Seeing with the dot product
+    summary: Detects when the player is looking at something by comparing the view direction with the direction to the object.
+    media: /media/vector-math-experiments/dot-product-sight.mp4
+    tech: [unity, csharp]
+  - title: Bouncy ray
+    summary: A ray that bounces off multiple surfaces, with each bounce worked out using the dot product.
+    media: /media/vector-math-experiments/preview.mp4
+    tech: [unity, csharp]
+  - title: Cross-product coordinate system
+    summary: A full coordinate system built from cross products — each axis perpendicular to the other two.
+    media: /media/vector-math-experiments/cross-product-frame.mp4
+    tech: [unity, csharp]
 ---
 
 ## Overview

@@ -30,6 +30,14 @@ export function validateContent(): ValidationReport {
     for (const ref of localMediaRefs(data)) {
       if (!publicFileExists(ref.src)) problems.push(`${ref.field}: file not found — public${ref.src}`);
     }
+    // The CMS's file fields name files after the field and rename anything else on save (deleting
+    // the original), which would break other references to it. Enforce the names up front.
+    if (data.preview?.startsWith("/") && !/\/preview\.\w+$/.test(data.preview)) {
+      problems.push(`preview: must be named preview.mp4 (got ${data.preview}) — the CMS renames other names on save`);
+    }
+    if (data.cover?.startsWith("/") && !/\/cover\.\w+$/.test(data.cover)) {
+      problems.push(`cover: must be named cover.<ext> (got ${data.cover}) — the CMS renames other names on save`);
+    }
     if (data.preview?.startsWith("/") && publicFileExists(data.preview)) {
       if (!publicFileExists(withExtension(data.preview, ".jpg"))) {
         notes.push(`preview has no poster (${withExtension(data.preview, ".jpg")}) — run npm run media to generate one`);

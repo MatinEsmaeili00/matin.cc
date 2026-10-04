@@ -154,6 +154,30 @@
   }
 }
 
+/* Architecture diagrams: an accent dash travelling along each edge ("data flow"). */
+.diagram-flow {
+  stroke: var(--color-accent);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-dasharray: 2 16;
+  opacity: 0.85;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .diagram-flow {
+    animation: diagram-flow 1.4s linear infinite;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .diagram-flow {
+    display: none;
+  }
+}
+@keyframes diagram-flow {
+  to {
+    stroke-dashoffset: -18;
+  }
+}
+
 /* Hide scrollbars on horizontally scrolling chip rows, keep them scrollable. */
 .no-scrollbar {
   scrollbar-width: none;

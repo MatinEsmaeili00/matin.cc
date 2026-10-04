@@ -2,6 +2,7 @@ import Image from "next/image";
 import type { ImageAsset, VideoAsset } from "@/lib/content/projects";
 import { cn } from "@/lib/utils";
 import { PreviewVideo } from "./preview-video";
+import { YouTubeHoverPreview } from "./youtube-hover-preview";
 import { ProceduralCover } from "./procedural-cover";
 
 /**
@@ -16,7 +17,7 @@ export function ProjectMedia({
   label,
   sizes,
   priority = false,
-  playback = "hover",
+  youtube,
   aspect = "aspect-video",
   className,
 }: {
@@ -27,7 +28,8 @@ export function ProjectMedia({
   label?: string;
   sizes: string;
   priority?: boolean;
-  playback?: "hover" | "inview";
+  /** YouTube id: plays a muted embed on hover when there's no local preview loop. */
+  youtube?: string | null;
   aspect?: string;
   className?: string;
 }) {
@@ -45,7 +47,7 @@ export function ProjectMedia({
       ) : (
         <ProceduralCover seed={slug} label={label} />
       )}
-      {preview && <PreviewVideo video={preview} mode={playback} />}
+      {preview ? <PreviewVideo video={preview} /> : youtube ? <YouTubeHoverPreview id={youtube} /> : null}
     </div>
   );
 }

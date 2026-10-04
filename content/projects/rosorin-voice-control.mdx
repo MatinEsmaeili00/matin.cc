@@ -5,7 +5,8 @@ year: 2026
 status: prototype
 tier: project
 priority: 70
-categories: [robotics, xr]
+categories: [robotics, xr, lab]
+homeSection: lab
 tech: [unreal, cpp, python, ros2, llm, speech-recognition, dgx-spark]
 role: Solo developer
 teamSize: 1
@@ -34,15 +35,23 @@ It applies the pattern from the [Digital Twin Platform](/work/digital-twin-platf
 
 ## Architecture
 
-```text title="Data flow" nolines
-Unreal PC                       DGX Spark                      ROSOrin Pro
-──────────                      ─────────                      ───────────
-Mic (hold T) / console          server.py :8002
-  → CPP_AICommandComponent ──►    faster-whisper  (speech → text)
-                                  rules parser    (fast path)
-                                  Ollama LLM      (fallback, JSON schema)
-  ◄── JSON command ────────────
-  → CPP_RosBridgeComponent ─── WebSocket ──────────────────► rosbridge :9090 → /cmd_vel
+```mermaid title="Data flow — Unreal, the DGX Spark and the robot"
+flowchart LR
+    subgraph PC["Unreal PC"]
+        MIC["Mic (hold T) or console"] --> AIC["CPP_AICommandComponent"]
+        AIC --> RBC["CPP_RosBridgeComponent"]
+    end
+    subgraph SPARK["DGX Spark"]
+        SRV["server.py :8002"] --> WH["faster-whisper"]
+        SRV --> RULES["rules parser"]
+        SRV --> OLL["Ollama gemma4:e4b"]
+    end
+    subgraph ROBOT["ROSOrin Pro"]
+        RBS["rosbridge :9090"] --> CMD["topic /cmd_vel"]
+    end
+    AIC -- "HTTP: text or WAV" --> SRV
+    SRV -- "JSON command" --> AIC
+    RBC -- "WebSocket: publish /cmd_vel" --> RBS
 ```
 
 ## Fast path, smart path

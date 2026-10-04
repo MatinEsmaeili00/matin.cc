@@ -7,6 +7,7 @@ status: shipped
 tier: featured
 priority: 85
 categories: [games, tools, technical-art]
+homeSection: games-tools
 tech: [unreal, cpp, blueprint, multiplayer]
 role: Technical artist & tool developer
 teamSize: 10
@@ -17,6 +18,13 @@ preview: /media/verocity/preview.mp4
 links:
   steam: https://store.steampowered.com/app/3572320/Verocity/
 aliases: [/verocity]
+gallery:
+  - src: /media/verocity/ranking-demo.mp4
+    alt: Three multiplayer clients racing side by side, each showing its live placement, next to the Unreal editor.
+    caption: Live placement across three networked clients
+  - src: /media/verocity/ranking-editor.mp4
+    alt: The Unreal editor viewport showing the ranking system working while players move along the track.
+    caption: The ranking system in the editor
 highlights:
   - Real-time race ranking on a dedicated multiplayer server, driven by spline distance
   - A minimap that turns a 3D bounding box into a 2D widget, with auto-generated map texture
@@ -34,9 +42,21 @@ I worked as a technical artist and tool developer. My job was the systems that s
 
 Every racing game needs to know who's in first. My first version used straight vector maths — dot products and scalar projection against hand-placed target points. It worked, but it fought the art team: every track change meant re-placing points and matching their width to the road, and curves needed dozens of closely spaced points because the projection only works on straight segments.
 
+<Figure
+  src="/media/verocity/ranking-sketch-1.jpg"
+  alt="Hand-drawn sketch: target points along the track divide it into stations; each player is scalar-projected onto the current segment to get a 0–1 progress value, with each section given a width."
+  caption="Version 1, sketched: target points, section widths and scalar projection"
+/>
+
 <Clip src="/media/verocity/ranking-v1.mp4" caption="Version 1: target points and scalar projection" />
 
 After studying how shipped racing games handle ranking, I replaced it with a **cumulative distance along a spline**. It's cheaper, easier to read, and the curve problem simply disappears: artists drop a spline down the track in seconds and the system works on any map, including ones that don't exist yet.
+
+<Figure
+  src="/media/verocity/ranking-sketch-2.jpg"
+  alt="Hand-drawn sketch: a spline along the track; each player's progress is the cumulative distance along it, the sum of segment lengths computed with the 3D distance formula."
+  caption="Version 2, sketched: cumulative distance along a spline"
+/>
 
 <GitHubCode path="PlayerRankingSystem/Source/PlayerRankingSystem/Private/CPP_RankingManagerComponent.cpp" lines="194-213" highlight="200-201" />
 

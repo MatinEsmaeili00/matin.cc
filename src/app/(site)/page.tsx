@@ -1,42 +1,31 @@
 import Image from "next/image";
-import { ArchiveTeaser } from "@/components/home/archive-teaser";
 import { AtAGlance } from "@/components/home/at-a-glance";
-import { CategoryTabs, type TabItem } from "@/components/home/category-tabs";
 import { Hero } from "@/components/home/hero";
-import { FeaturedProject } from "@/components/project/featured-project";
-import { ProjectCard } from "@/components/project/project-card";
+import { HomeSection } from "@/components/home/home-section";
+import { SectionNav } from "@/components/home/section-nav";
 import { ButtonLink } from "@/components/ui/button";
 import { ArrowRight, Download, Mail } from "@/components/ui/icons";
 import { SectionHeading } from "@/components/ui/section-heading";
+import { HOME_SECTIONS } from "@/config/home";
 import { site } from "@/config/site";
-import { CATEGORIES } from "@/config/taxonomy";
-import { compareProjects, getAllProjects, toSummary } from "@/lib/content/projects";
+import { getAllProjects, toSummary } from "@/lib/content/projects";
 import { personJsonLd, JsonLd } from "@/lib/seo";
 import { resumeHref } from "@/lib/site-links";
 
-/** The "In the Lab" category gets an accent dot wherever categories are listed. */
-const LAB = "lab";
+/** The work-in-progress section gets a live "cooking" indicator. */
+const LIVE_SECTION = "lab";
 
 export default async function HomePage() {
   const projects = await getAllProjects();
-  const featured = projects.filter((p) => p.tier === "featured");
-  const archive = projects.filter((p) => p.tier === "archive");
   const active = projects.filter((p) => p.status === "active").slice(0, 4);
   const resume = resumeHref();
 
-  // Category tabs: every project as a card, featured work first within each tab.
-  const tabItems: TabItem[] = [...projects].sort(compareProjects).map((p) => ({
-    slug: p.slug,
-    categories: p.categories,
-    highlight: p.tier === "project",
-    card: <ProjectCard project={toSummary(p)} />,
-  }));
-  const tabCategories = CATEGORIES.map((c) => ({
-    id: c.id,
-    label: c.label,
-    count: projects.filter((p) => p.categories.includes(c.id)).length,
-    dot: c.id === LAB,
-  })).filter((c) => c.count > 0);
+  // Sections from content/settings/home.json, each with the projects that chose it.
+  const sections = HOME_SECTIONS.map((section) => {
+    const members = projects.filter((p) => p.homeSection === section.id);
+    const count = members.reduce((n, p) => n + Math.max(p.items.length, 1), 0);
+    return { section, members, count };
+  }).filter((s) => s.members.length > 0);
 
   return (
     <>
@@ -46,30 +35,22 @@ export default async function HomePage() {
 
       <AtAGlance projects={projects} />
 
-      {featured.length > 0 && (
-        <section aria-labelledby="featured" className="page gutter mt-24 scroll-mt-20 md:mt-36">
-          <SectionHeading id="featured" index="A" title="Featured work" />
-          <div className="space-y-20 md:space-y-32">
-            {featured.map((project, i) => (
-              <FeaturedProject key={project.slug} project={project} index={i} />
-            ))}
-          </div>
-        </section>
-      )}
-
-      <section aria-labelledby="browse" className="page gutter mt-32 md:mt-48">
-        <SectionHeading id="browse" index="B" title="Browse by category" />
-        <CategoryTabs items={tabItems} categories={tabCategories} />
-      </section>
-
-      {archive.length > 0 && (
-        <section aria-label="Archive" className="page gutter mt-24">
-          <ArchiveTeaser projects={archive.map(toSummary)} />
-        </section>
-      )}
+      <div id="work" className="mt-24 scroll-mt-14 md:mt-32">
+        <SectionNav
+          sections={sections.map(({ section, count }) => ({
+            id: section.id,
+            title: section.title,
+            count,
+            live: section.id === LIVE_SECTION,
+          }))}
+        />
+        {sections.map(({ section, members }) => (
+          <HomeSection key={section.id} section={section} projects={members} live={section.id === LIVE_SECTION} />
+        ))}
+      </div>
 
       <section aria-labelledby="about" className="page gutter mt-32 md:mt-48">
-        <SectionHeading id="about" index="C" title="About" />
+        <SectionHeading id="about" index="—" title="About" />
         <div className="grid gap-10 md:grid-cols-12">
           {site.photo && (
             <Image

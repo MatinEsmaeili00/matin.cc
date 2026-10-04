@@ -9,7 +9,7 @@ export function Gallery({ items }: { items: GalleryItem[] }) {
     <ul className="grid gap-x-6 gap-y-10 md:grid-cols-2">
       {items.map((item) => (
         <li key={item.kind === "image" ? item.src : item.mp4}>
-          <figure>
+          <figure data-preview-root>
             {item.kind === "image" ? (
               <Image
                 src={item.src}
@@ -24,7 +24,7 @@ export function Gallery({ items }: { items: GalleryItem[] }) {
                 {item.poster && (
                   <Image src={item.poster} alt="" fill sizes="(min-width: 768px) 50vw, 100vw" className="object-cover" />
                 )}
-                <PreviewVideo video={item} mode="inview" />
+                <PreviewVideo video={item} />
               </div>
             )}
             {item.caption && <figcaption className="label mt-3 normal-case tracking-[0.02em]">{item.caption}</figcaption>}

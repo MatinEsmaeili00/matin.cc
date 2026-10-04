@@ -59,7 +59,7 @@ export async function Hero({ active }: { active: ProjectSummary[] }) {
           <p className="text-lead text-fg-muted">{site.tagline}</p>
 
           <div className="mt-8 flex flex-wrap gap-3">
-            <ButtonLink href="#featured" icon={<ArrowRight className="size-3.5 rotate-90" />}>
+            <ButtonLink href="#work" icon={<ArrowRight className="size-3.5 rotate-90" />}>
               View my work
             </ButtonLink>
             {resume && (
