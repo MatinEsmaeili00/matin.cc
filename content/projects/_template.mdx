@@ -1,0 +1,84 @@
+---
+# Copy this file to content/projects/<slug>.mdx (the filename becomes /work/<slug>),
+# or run `npm run new-project`. Files starting with "_" are ignored.
+# Every field is documented in src/lib/content/schema.ts.
+
+# ── Required ─────────────────────────────────────────────────────────────
+title: Project Title
+summary: One line, ~80–160 characters. Shown on cards and used as the meta description.
+year: 2026
+categories: [rendering] # ids from src/config/taxonomy.ts → CATEGORIES
+
+# ── Recommended ──────────────────────────────────────────────────────────
+yearEnd: present # a later year, or "present"; omit for single-year work
+status: active # shipped | active | prototype | archived
+tier: project # featured | project | archive
+priority: 0 # higher sorts first within its tier
+tech: [unreal, cpp, hlsl] # ids from src/config/taxonomy.ts → TECH
+role: Solo developer
+teamSize: 1
+context: Personal R&D
+
+# ── Sources: connect, don't duplicate ────────────────────────────────────
+github: MatinEsmaeili00/RepoName # live stars, languages, last push, release
+youtube: https://youtu.be/VIDEO_ID # hero player (click-to-load)
+videos: # extra videos, shown in a Videos section
+  - id: https://youtu.be/OTHER_ID
+    title: Optional title override (defaults to the YouTube title)
+links:
+  steam: https://store.steampowered.com/app/...
+  itch: https://example.itch.io/game
+  demo: https://...
+  docs: https://...
+
+# ── Media (put files in public/media/<slug>/ — `npm run media` helps) ─────
+cover: /media/slug/cover.jpg # optional: defaults to preview poster → YouTube thumbnail
+preview: /media/slug/preview.mp4 # muted loop; .webm + .jpg poster siblings are auto-detected
+gallery:
+  - src: /media/slug/shot-1.jpg
+    alt: What the image shows (required)
+    caption: Optional caption
+
+# ── Case-study extras ────────────────────────────────────────────────────
+highlights:
+  - One line per thing you built or decided
+metrics:
+  - value: "0.4 s"
+    label: what the number measures
+aliases: [/old-url] # old URLs that should 301 here
+draft: true # remove (or set false) to publish
+---
+
+{/* Suggested sections — use the ones that fit, delete the rest.
+    Each ## heading becomes a numbered section and a table-of-contents entry. */}
+
+## Overview
+
+What it is and why it exists, in two or three sentences.
+
+## The problem
+
+What made this hard or interesting.
+
+## What I built
+
+The system, at the level of its main parts.
+
+## Technical breakdown
+
+How it works. Use code where it explains something:
+
+```hlsl title="Example.usf" {2}
+float Height = PrevHeight.SampleLevel(Sampler, UV, 0).r;
+Height = max(Height, Press);
+```
+
+<GitHubCode path="Shaders/Private/Example.usf" lines="10-40" highlight="20-25" />
+
+## Challenges
+
+What went wrong and how you solved it.
+
+## Results
+
+What it achieved — numbers, outcomes, what you'd do next.

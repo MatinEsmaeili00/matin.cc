@@ -1,0 +1,85 @@
+---
+title: Snow Deformation
+summary: A UE 5.8 plugin that simulates a persistent, world-anchored snow height field on the GPU and presses real footprints into it.
+year: 2026
+status: active
+tier: featured
+priority: 100
+categories: [rendering, tools]
+tech: [unreal, cpp, hlsl, compute-shaders, rdg, gpu-simulation, materials]
+role: Solo developer
+teamSize: 1
+context: Personal R&D
+github: MatinEsmaeili00/SnowDeformation
+highlights:
+  - Two compute passes per frame through the Render Dependency Graph — accumulate, then normals
+  - A small scrolling texture gives effectively unbounded, world-anchored tracks
+  - Material wiring that needs no Blueprint at all — drop in two assets and it works
+  - Zero GPU cost when nothing is moving and the snow has finished healing
+---
+
+## Overview
+
+Snow that remembers where you walked is a classic real-time effect, and most implementations cheat: decals that fade, or a render target that only covers a fixed patch of the level. I wanted the real thing as a reusable Unreal Engine plugin — a GPU height field that persists, follows the player across an arbitrarily large world, pushes up a rim of displaced snow around every print, and slowly fills back in.
+
+It's built from scratch on the low-level path: `FGlobalShader`, `SHADER_PARAMETER_STRUCT`, `FComputeShaderUtils::AddPass` and `ENQUEUE_RENDER_COMMAND`, wrapped in a world subsystem and a lightweight actor component so gameplay code never touches the render thread.
+
+## Architecture
+
+The game thread collects contacts; the render thread does all the work.
+
+```text title="Frame pipeline" nolines
+USnowDeformerComponent (per character)
+        │  traces each foot socket to the ground, reports presses this frame
+        ▼
+USnowDeformationSubsystem::Tick()          — game thread, once per world
+        │  1. moves the simulated region to follow the focus actor
+        │  2. converts contacts to FSnowDeformerGPU (region-local space)
+        │  3. ENQUEUE_RENDER_COMMAND → Dispatch_RenderThread
+        ▼
+SnowDeformation.usf                        — render thread, GPU
+        │  Pass 1 SnowAccumulateCS: reproject → refill → stamp deformers
+        │  Pass 2 SnowNormalsCS:    height field → RGBA (height + normal.xy)
+        ▼
+SnowData render target  →  snow material WPO + normal
+```
+
+## A world-sized surface from a 1024² texture
+
+The height field is a fixed-resolution texture covering a square of world space centred on the player. Each frame, the accumulate pass re-samples last frame's buffer at an offset equal to how far the region moved — so tracks stay where they were made while the window scrolls. It's the same trick trail and decal systems use, applied to a persistent simulation.
+
+Working in region-local coordinates has a second benefit: positions stay in a comfortable float range no matter how far from the world origin the level is built.
+
+<GitHubCode path="Shaders/Private/SnowDeformation.usf" lines="57-75" highlight="62-71" />
+
+## Stamping footprints
+
+Each deformer is a press with a soft core and an optional rim. The core uses `max()` so a deeper, more recent press always wins over an older, shallower one at the same texel — that is what makes a walked trail persist. The rim is a half-sine ring of snow shoved outwards, written only where the snow is still undisturbed so it never erases an older print.
+
+<GitHubCode path="Shaders/Private/SnowDeformation.usf" lines="77-105" highlight="89-102" />
+
+## Normals in the same dispatch budget
+
+A second pass turns the height field into what the material samples: `R` is height, `GB` is the world-space normal's XY, computed with central differences scaled into world units. Z is reconstructed in the material, keeping the output to a single RGBA16F texture.
+
+<GitHubCode path="Shaders/Private/SnowDeformation.usf" lines="118-142" highlight="134-139" />
+
+## Challenges
+
+### Getting a runtime texture into a material
+
+A material can't reference a texture that only exists at runtime — that turned out to be the hardest part of the whole plugin, not the shader. The final design offers three routes in order of effort: assign a render-target asset and a Material Parameter Collection in Project Settings (no Blueprint at all), register a dynamic material instance, or read the textures yourself through Blueprint-pure getters.
+
+### Signed height needs a float format
+
+The rim of pushed-up snow is stored as *negative* height. A fixed-point render target silently clips it, and every print loses its ridge. The plugin checks the format at startup, warns when it's wrong, and force-enables the UAV flag if it was forgotten.
+
+### Not paying for idle snow
+
+The dispatch is skipped entirely when the region is stationary, nothing is pressing, and the field has finished healing. A moving region always dispatches — the texture is world-anchored, so a move must be reprojected or every track would slide with the player.
+
+## Results
+
+The plugin ships with seven documentation chapters — architecture, the GPU pipeline, a line-by-line shader walkthrough, a C++ reference, material wiring, a build-it-yourself guide and a tuning/troubleshooting reference — so it doubles as a teaching resource for Unreal's render-graph compute path.
+
+Known limits are deliberate: a single region per world, client-side only (snow is cosmetic, so each client traces its own pawn), and a straight-down ground trace. Its companion, [Sand Deformation](/work/sand-deformation), keeps the scrolling-region technique and replaces everything else with real granular physics.

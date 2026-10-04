@@ -1,0 +1,54 @@
+---
+title: Unity Shader Collection
+summary: Hand-written ShaderLab/HLSL effects for Unity's built-in pipeline — vertex displacement, distortion waves, layered stencils, foliage and snow.
+year: 2024
+status: shipped
+tier: project
+priority: 40
+categories: [technical-art, rendering]
+tech: [unity, hlsl, shaderlab, stencil-buffer]
+role: Solo developer
+teamSize: 1
+github: MatinEsmaeili00/Unity5-ShaderShowcase
+preview: /media/unity-shader-collection/preview.mp4
+gallery:
+  - src: /media/unity-shader-collection/displacement.mp4
+    alt: A plane rippling with concentric waves produced in the vertex shader.
+    caption: Displacement — radial waves computed in the vertex shader
+  - src: /media/unity-shader-collection/explosion.mp4
+    alt: A distortion wave expanding outwards from a point.
+    caption: Explosion wave — expanding distortion
+  - src: /media/unity-shader-collection/plants.mp4
+    alt: Side-by-side foliage rendered with alpha blending and with alpha clipping.
+    caption: Plants — alpha blending vs alpha clipping
+  - src: /media/unity-shader-collection/snow-on-top.mp4
+    alt: Objects whose upward-facing surfaces turn white like settled snow, with an adjustable blend band.
+    caption: Snow on top — world-normal mask with an inverse-lerp blend range
+---
+
+## Overview
+
+A growing collection of shaders written by hand in ShaderLab and HLSL for Unity's built-in render pipeline. Each lives in its own folder with example materials, and a single demo scene previews them all. They're small on purpose — each isolates one idea worth understanding properly. Several of them grew out of production work, like the [nested stencil reveal](/work/ultrasound-procedure) in the ultrasound trainer.
+
+| Shader | Idea |
+|---|---|
+| Displacement | Vertex displacement from radial cosine waves |
+| Explosion wave | A distortion wave expanding from a centre |
+| Stencil layers | Multi-layer stencil-buffer transitions |
+| Plants | Alpha blending vs alpha clipping for foliage |
+| Snow on top | Normal-based snow coverage with a controllable blend band |
+| Blend, gradients, math VFX | Compositing modes, UV-driven gradients, math-driven patterns |
+
+## Snow on top
+
+Upward-facing surfaces turn white. The world-space normal's Y component says how much a surface faces the sky; an **inverse lerp** remaps that into a 0–1 blend between two artist-controlled thresholds, so the snow line can be soft or sharp.
+
+<GitHubCode path="SnowOnTop/Shaders/SnowOnTop.shader" lines="55-67" highlight="62-65" lang="hlsl" />
+
+## Displacement
+
+The displacement shader moves vertices in the vertex stage: distance from the UV centre drives a travelling cosine wave, attenuated towards the edges.
+
+<GitHubCode path="DisplacementShader/Shaders/Re_VertexOffcet.shader" lines="74-91" highlight="77-79,91" lang="hlsl" />
+
+The collection is MIT-licensed — drop the folder into a Unity project, open the demo scene and press play.

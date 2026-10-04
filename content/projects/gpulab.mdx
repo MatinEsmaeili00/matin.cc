@@ -1,0 +1,48 @@
+---
+title: GPULab
+summary: Seven runnable lessons in low-level GPU programming for UE 5.8 — global shaders, compute, RDG, buffers and ping-pong simulation — written to be read.
+year: 2026
+status: shipped
+tier: project
+priority: 60
+categories: [rendering, tools]
+tech: [unreal, cpp, hlsl, compute-shaders, rdg, gpu-simulation]
+role: Author
+teamSize: 1
+context: Teaching resource
+github: MatinEsmaeili00/GPULab
+highlights:
+  - Every lesson is a shader you can run, paint into a render target and look at
+  - Two tracks — Docs explain the finished code, Tutorial builds it from an empty folder
+  - Written from the UE 5.8 engine source, with every API checked against the headers
+---
+
+## Overview
+
+Unreal's low-level rendering path — `FGlobalShader`, shader parameter structs, the Render Dependency Graph — is powerful and thinly documented. GPULab is the resource I wanted when I started: a self-contained UE 5.8 plugin where every concept comes with a compute or pixel shader you can run and *see*.
+
+It's also the foundation the [Snow](/work/snow-deformation) and [Sand](/work/sand-deformation) deformation plugins are built on.
+
+## The lessons
+
+| # | Lesson | The one idea |
+|---|---|---|
+| 01 | Hello Compute | The three pieces every GPU program in Unreal needs |
+| 02 | Parameters | How a number gets from C++ into a shader |
+| 03 | Threads and Groups | What "parallel" actually means, drawn as a picture |
+| 04 | Buffers and Readback | Arrays in, arrays out, and why reading results is slow |
+| 05 | Multi-Pass RDG | Two passes, one graph, and the barriers you didn't write |
+| 06 | Pixel Shader Pass | The other half of the GPU: drawing triangles |
+| 07 | Persistent Simulation | Keeping state alive across frames with ping-pong textures |
+
+## Designed to be learned from
+
+A **GPULab Demo** actor builds its own UAV render target and runs any lesson on a plane, live in the editor viewport — pick a lesson from a dropdown and tweak its parameters in the Details panel without touching code. Each lesson is also a plain Blueprint node, so wiring it up by hand teaches the setup you'll use for your own shaders.
+
+There are two ways through the material. **Docs** explain the finished code one concept per chapter; **Tutorial** walks you through writing your own version from an empty folder, with a check at every step. The comments are deliberately far denser than production code — it's a textbook you can compile.
+
+## Sources, not tutorials
+
+GPULab was written by reading the Unreal Engine 5.8 source directly. Every lesson ends with a "Where this comes from" section listing the exact engine files behind it, alongside Epic's documentation and community write-ups. The engine paths are the primary source on purpose: they match your exact engine version, and unlike a blog post, they can't go out of date.
+
+All lessons were verified running on D3D12 against UE 5.8.

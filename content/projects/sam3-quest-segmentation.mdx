@@ -1,0 +1,36 @@
+---
+title: Live Segmentation on Quest 3
+summary: Streams the Meta Quest 3 passthrough camera from Unity to Meta's SAM 3 on a GPU server and overlays text-prompted segmentation masks live.
+year: 2026
+status: prototype
+tier: project
+priority: 50
+categories: [xr, robotics, research]
+tech: [unity, csharp, python, ar, meta-quest, computer-vision, docker]
+role: Solo developer
+teamSize: 1
+github: MatinEsmaeili00/sam3-unity
+cover: /media/sam3-quest-segmentation/cover.jpg
+highlights:
+  - Passthrough frames → WebSocket → SAM 3 on a GPU box → masks, boxes and scores back to the headset
+  - Text prompts — say "cup" or "keyboard" and every match comes back as a coloured mask
+  - Dockerized server with token auth, plus a desktop client for testing the network path first
+---
+
+## Overview
+
+Mixed reality gets much more useful when the headset understands what it's looking at. This project streams the **Meta Quest 3 passthrough camera** from a Unity app to Meta's **Segment Anything Model 3** running on a GPU machine on the local network, and draws the returned masks over the user's view. Ask for `"cup"` or `"keyboard"` and every matching object comes back with a mask, a bounding box and a confidence score.
+
+```text title="Pipeline" nolines
+Quest 3 (Unity)                                   GPU machine (Docker)
+passthrough camera → JPEG ─── ws://IP:8765/ws ──► SAM 3 image model
+RawImage overlay  ◄── mask PNG + boxes/scores ─── (one frame at a time)
+```
+
+## Pieces
+
+- **Server** — SAM 3 (848M parameters) in a Docker container with GPU access, serving masks over WebSocket. A shared token guards it, because Docker-published ports bypass the host firewall and anyone on the network could otherwise use the GPU.
+- **Unity client** — `QuestPassthroughCameraSource` requests headset-camera permission and feeds Meta's `PassthroughCameraAccess` texture to `Sam3StreamClient`, which sends frames, receives masks, composites them on a world-space canvas, and reconnects automatically.
+- **Desktop test client** — streams a webcam or images to the server and reports per-frame round-trip latency and FPS, so the network path can be verified before involving the headset.
+
+It's the networked companion to an offline SAM 3 study of image segmentation and video tracking.

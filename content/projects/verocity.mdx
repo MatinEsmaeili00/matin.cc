@@ -1,0 +1,94 @@
+---
+title: Verocity
+summary: A multiplayer cyberpunk kart racer released on Steam — I built its race-ranking, minimap and slope-physics systems as reusable C++ plugins.
+year: 2023
+yearEnd: 2025
+status: shipped
+tier: featured
+priority: 85
+categories: [games, tools, technical-art]
+tech: [unreal, cpp, blueprint, multiplayer]
+role: Technical artist & tool developer
+teamSize: 10
+context: Graduate game production course
+github: MatinEsmaeili00/UE5-MultiplayerRacingGames-Plugins
+youtube: 47iKEov1gcM
+preview: /media/verocity/preview.mp4
+links:
+  steam: https://store.steampowered.com/app/3572320/Verocity/
+aliases: [/verocity]
+highlights:
+  - Real-time race ranking on a dedicated multiplayer server, driven by spline distance
+  - A minimap that turns a 3D bounding box into a 2D widget, with auto-generated map texture
+  - Slope-aware movement that speeds players up downhill and slows them uphill
+  - Both systems packaged as drag-and-drop UE5 plugins for non-programmers
+---
+
+## Overview
+
+Verocity is a futuristic multiplayer racing game set in a cyberpunk city of the same name — think Mario Kart with character abilities and track items. It was built by a team of ten over two years in a graduate game-production course and released on Steam.
+
+I worked as a technical artist and tool developer. My job was the systems that sit between design and code: things artists can place, resize and forget, that still behave correctly under multiplayer replication.
+
+## Player placement
+
+Every racing game needs to know who's in first. My first version used straight vector maths — dot products and scalar projection against hand-placed target points. It worked, but it fought the art team: every track change meant re-placing points and matching their width to the road, and curves needed dozens of closely spaced points because the projection only works on straight segments.
+
+<Clip src="/media/verocity/ranking-v1.mp4" caption="Version 1: target points and scalar projection" />
+
+After studying how shipped racing games handle ranking, I replaced it with a **cumulative distance along a spline**. It's cheaper, easier to read, and the curve problem simply disappears: artists drop a spline down the track in seconds and the system works on any map, including ones that don't exist yet.
+
+<GitHubCode path="PlayerRankingSystem/Source/PlayerRankingSystem/Private/CPP_RankingManagerComponent.cpp" lines="194-213" highlight="200-201" />
+
+Ranking runs only on the server, which sorts players by distance and pushes the result to each player's display component:
+
+<GitHubCode path="PlayerRankingSystem/Source/PlayerRankingSystem/Private/CPP_RankingManagerComponent.cpp" lines="103-118" highlight="116-118" />
+
+Because several developers worked in the same project, I wrapped the system in a component-based C++ module that can be toggled for debugging — important when we were cutting weekly test builds.
+
+<Clip src="/media/verocity/ranking-spline.mp4" caption="Version 2: progress measured along an Unreal spline" />
+
+## Minimap
+
+The minimap converts a 3D bounding box into a 2D UI widget that shows the player and opponents with different icons. Artists adjust it by resizing the box, not by editing numbers. It can also capture the area inside the box and generate a starting texture for the map, and the widget always preserves the texture's aspect ratio so it can be scaled freely without distortion. It's C++ throughout and supports both single-player and multiplayer.
+
+<Video id="dCNLXFKU9DY" caption="Minimap system" />
+
+## Slope-aware movement
+
+To make the track feel physical, player speed adapts to terrain: faster on descents, slower on climbs. A downward trace reads the surface normal; its **dot product** with the trace direction tells whether the kart is on a slope, and the **cross product** with the kart's forward vector tells whether that slope is uphill or downhill.
+
+```cpp title="Cpp_SurfaceNormalComponent.cpp" {2,5,9-10}
+FVector HitNormal = OutHit.ImpactNormal;
+FVector LineTracerV = (Start - End).GetSafeNormal();
+// calculation dot product to determine if the character on a slope or not!
+dotProduct = FVector::DotProduct(LineTracerV, HitNormal);
+if (dotProduct < .99f)
+{
+    // calculate the cross product to determine whether the slope is downhill or uphill
+    CrossProductV = FVector::CrossProduct(LineTracerV, HitNormal);
+    CharacterCross = FVector::CrossProduct(GetOwner()->GetActorForwardVector(), CrossProductV);
+    if (CharacterCross.Z > 0) // character is going down
+    {
+        if (CharacterMovement && CharacterMovement->GetMaxSpeed() < 4999)
+        {
+            CharacterMovement->MaxWalkSpeed = 5000;
+        }
+    }
+    if (CharacterCross.Z < 0) // character is going up
+    {
+        if (CharacterMovement && CharacterMovement->GetMaxSpeed() > 2501)
+        {
+            CharacterMovement->MaxWalkSpeed = 2500;
+        }
+    }
+}
+```
+
+<Video id="VZgjTJ3eBig" caption="Physics-based slope detection" />
+
+## Results
+
+Verocity shipped on Steam. Afterwards I extracted the ranking and minimap systems into a standalone plugin collection — each with its own demo map for single-player and multiplayer — so artists and non-programmers can drop them into any UE5 project.
+
+<Video id="bAlJmFFDSNI" caption="Player placement, version 1 vs version 2" />

@@ -1,0 +1,105 @@
+---
+title: Ultrasound Procedure Trainer
+summary: A VR training game for an ultrasound-guided neck procedure — segment-intersection hand tracking and nested stencil shaders that reveal targets.
+year: 2024
+yearEnd: present
+status: active
+tier: project
+priority: 45
+categories: [xr, technical-art, math]
+tech: [unity, csharp, hlsl, shaderlab, stencil-buffer, vr]
+role: Shader developer & mathematics programmer
+teamSize: 5
+context: Medical training research
+youtube: muOMgNoS46I
+preview: /media/ultrasound-procedure/preview.mp4
+aliases: [/ultrasound-procedure, /usp]
+highlights:
+  - Hand-movement constraints from closest-point line-segment intersection, tunable per scenario
+  - Nested stencil shaders so targets appear only inside the flashlight's reveal, without popping
+  - Delegate-based interfaces so five developers could build systems independently
+---
+
+## Overview
+
+Training interns for an ultrasound-guided procedure on the neck is limited by equipment and supervision time. This VR game is an add-on training tool: it isn't a simulation of the procedure itself, but it trains the hand coordination the procedure needs — steering a probe and a needle together — in an engaging way, before interns practise with real probes on gel phantoms.
+
+I'm a technical developer on a team of five, responsible for the maths behind hand movement and for the shaders.
+
+## Hand movement as segment intersection
+
+The probe (shown as a flashlight) and the needle are both treated as line segments. Each frame I compute the closest points between the two segments; whether those points fall within both segments, how close they are, and where along the needle they lie decide whether the player is aiming correctly and what feedback to show.
+
+```csharp title="LineIntersection.cs" {4-14}
+public void calcIntersection(Vector3 currentFlash_Start, Vector3 currentFlash_End, Vector3 currentNeedle_Start,
+    Vector3 currentNeedle_End, out Vector3 p0, out Vector3 p1, out bool onSegment, out bool intersects, out bool showBall)
+{
+    Vector3 r = currentFlash_End - currentFlash_Start;
+    Vector3 s = currentNeedle_End - currentNeedle_Start;
+    Vector3 q = currentFlash_Start - currentNeedle_Start;
+    float dotqr = Vector3.Dot(q, r);
+    float dotqs = Vector3.Dot(q, s);
+    float dotrs = Vector3.Dot(r, s);
+    float dotrr = Vector3.Dot(r, r);
+    float dotss = Vector3.Dot(s, s);
+    float denom = dotrr * dotss - dotrs * dotrs;
+    float numer = dotqs * dotrs - dotqr * dotss;
+    float t = numer / denom;
+    float u = (dotqs + t * dotrs) / dotss;
+    // The two points of intersection
+    p0 = currentFlash_Start + t * r;
+    p1 = currentNeedle_Start + u * s;
+    // Is the intersection occurring along both line segments and does it intersect
+    onSegment = false;
+    intersects = false;
+    showBall = false;
+    if (0 <= t && t <= 1 && 0 <= u && u <= 1)
+    {
+        onSegment = true;
+        if (offsetFocus <= u && u <= offsetFocus + focusRange)
+        {
+            showBall = true;
+        }
+    }
+    if ((p0 - p1).magnitude <= marginOfError) intersects = true;
+}
+```
+
+A **location coordinator** defines the start and end points of the segments, so the same system adapts to different scenarios, and a customization panel widens or narrows the allowed range of movement. Systems talk to each other through C# delegates, which let each developer work on a separate component while keeping everything connected.
+
+## Revealing targets with stencils
+
+Players look for gems (bacteria, in an earlier version) that must be confirmed by lighting them with the flashlight — distinguishing them from non-collectible objects. Simply toggling objects on made them pop into view, so I built a **nested stencil** setup: an invisible mask writes a stencil reference where the flashlight reaches, and the gem shader only draws where that reference passes.
+
+<Columns>
+
+```shaderlab title="S_GemMask.shader"
+Tags { "Queue"="Geometry-1" }
+ZWrite Off
+ColorMask 0
+Stencil
+{
+    Ref 2 // StencilRef
+    Comp Always
+    Pass Replace
+}
+```
+
+```shaderlab title="S_Gem.shader"
+Tags {
+    "RenderType"="Transparent"
+    "Queue"="Transparent"
+}
+Stencil
+{
+    Ref 2
+    Comp LEqual
+    Pass Keep
+}
+```
+
+</Columns>
+
+The mask renders before regular geometry and writes nothing to colour or depth — only the stencil. Layering several masks and references gives smooth, staged reveals instead of hard pops. Once the shader worked, I refined the look together with the artists.
+
+<Video id="3zSAWaBzEUo" caption="Stencil-based reveal in the trainer" />

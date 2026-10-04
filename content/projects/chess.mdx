@@ -1,0 +1,39 @@
+---
+title: Chess
+summary: A two-player 2D chess game for Android, built on my own move-generation logic, including check, checkmate and king-safety rules.
+year: 2019
+status: shipped
+tier: archive
+categories: [games]
+tech: [unity, csharp, android]
+role: Solo developer
+teamSize: 1
+youtube: tuu4fREPEf0
+preview: /media/chess/preview.mp4
+gallery:
+  - src: /media/chess/shot-1.jpg
+    alt: Unity editor with a debug view of the board grids beside the game view, highlighting the squares a piece can move to
+  - src: /media/chess/shot-2.jpg
+    alt: Unity editor with the debug grids and game view, a selected pawn highlighted in red next to its available square
+highlights:
+  - Separate position grids for white and black, projected onto a third grid to find legal moves
+  - Check and checkmate detection by simulating every possible move
+  - King moves that account for squares under attack, not just empty ones
+aliases: [/chess]
+---
+
+## Overview
+
+One of my early games: a 2D chess game for two players sharing one Android device. A custom algorithm I wrote handles every part of play, from legal moves to special states like check and checkmate.
+
+## Technical breakdown
+
+The core of the game is two 2D grids, one for the white pieces and one for the black pieces, each storing positional data. They're projected onto a third grid, which is used to work out legal moves and find empty squares on the fly.
+
+## Challenges
+
+- **Check and checkmate.** Whenever the king is in check, the game simulates every possible move of every piece in the background to see whether any of them resolves it. It's not the most efficient approach, but it works.
+- **The king's movement.** A king can't just move to any empty square. The algorithm also accounts for every square the opponent's pieces threaten.
+- **Breaking the check.** While the king is in danger, only the pieces that can break the check are allowed to move, which keeps play realistic and strategic.
+
+This project was a big step in my development. It combined custom game logic, strategy-game rules and a lot of problem-solving.

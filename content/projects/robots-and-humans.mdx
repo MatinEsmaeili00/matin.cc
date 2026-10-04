@@ -1,0 +1,56 @@
+---
+title: Robots & Humans
+summary: Early-stage research into a platform for commanding physical robots by voice and text, mirrored live in a digital twin and trained in simulation first.
+year: 2026
+yearEnd: present
+status: prototype
+tier: project
+priority: 65
+categories: [robotics, xr, research]
+tech: [unreal, ros2, llm, dgx-spark, photogrammetry, gaussian-splatting]
+context: Digital-twin & robotics research
+youtube: 2QwrUc4W65s
+aliases: [/robots-and-humans]
+gallery:
+  - src: /media/robots-and-humans/digital-twin.jpg
+    alt: Aerial view of an industrial site with robots, their paths in blue, and labelled inspection points and a charging station.
+    caption: Top-down monitoring concept — every robot, target and path in one view
+  - src: /media/robots-and-humans/robot-sim.jpg
+    alt: A small robot in a university atrium with a projected path, and a side panel listing its current task, priorities, battery and status.
+    caption: Third-person view — follow one robot and inspect its task queue and health
+---
+
+## Overview
+
+After several years of building digital twins, we're extending them to physical robots. The goal is a platform where people control robots through AI-powered voice or text commands, monitor each robot's state in real time, and see its actions mirrored in both the digital twin and the real world.
+
+Simulation is central: robots can practise difficult tasks safely in the twin first, and once a behaviour is learned and validated virtually, the same behaviour is transferred to the physical robot.
+
+The project is at an early stage; these prototypes show the interface and interaction ideas we're pursuing.
+
+## Goals
+
+- Assign tasks to robots with AI commands, by voice or text, alongside manual control.
+- Monitor every robot's position, status, target and current action.
+- Support robots from different manufacturers on one platform.
+- Synchronise physical robots with their digital twins in real time.
+- Test and train in simulation before real-world deployment.
+- Reconstruct real environments with drones, photogrammetry and 3D scanning.
+
+## Architecture
+
+<Figure
+  src="/media/robots-and-humans/architecture.jpg"
+  alt="Diagram with ROS 2 at the centre, connected to NVIDIA Isaac (simulation, synthetic sensors, digital twin), physical robots (manipulators, sensors), Unreal Engine via the rclUE ROS 2 bridge (visualization and interface), and the NAV2, MoveIt 2 and SLAM stacks."
+  caption="ROS 2 at the centre: Isaac for simulation, Unreal for visualization and interface, Nav2, MoveIt 2 and SLAM for autonomy"
+/>
+
+## From AI command to action
+
+In the [Digital Twin Platform](/work/digital-twin-platform) we built a local AI assistant on an NVIDIA DGX Spark that understands voice commands, answers users and triggers actions inside the twin. The plan is to extend it so those commands drive physical robots while the application monitors their actions live — the first working slice of that is [Robot Voice Control](/work/rosorin-voice-control).
+
+## Scanning the world in
+
+Robots need accurate environments to rehearse in, so we capture real spaces with drones, photogrammetry and 3D scanning, then use them as navigation and task-practice environments.
+
+<Embed src="https://superspl.at/s?id=edb4fe52" title="3D scan of a real environment" caption="Interactive Gaussian-splat scan" />

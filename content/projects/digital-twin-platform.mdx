@@ -1,0 +1,53 @@
+---
+title: Digital Twin Platform
+summary: A multiplayer VR/AR digital twin for industrial training, with live mode switching, a shared "toy mode" model and a local AI assistant.
+year: 2026
+yearEnd: present
+status: active
+tier: featured
+priority: 90
+categories: [xr, robotics]
+tech: [godot, gdscript, vr, ar, meta-quest, multiplayer, llm, speech-recognition, dgx-spark]
+role: Main programmer
+teamSize: 1
+youtube: TBK0gXnL9dg
+aliases: [/digital-twin-platform, /digital-twin]
+highlights:
+  - Multiplayer sessions where several headset users share one live digital twin
+  - Seamless switching between full VR and passthrough AR on Meta Quest 3
+  - Toy Mode — the host rescales and relocates the whole plant for demonstration
+  - Admin and guest permissions over the shared session
+  - A voice-driven AI assistant running locally on an NVIDIA DGX Spark
+---
+
+## Overview
+
+The Digital Twin Platform is a multiplayer VR/AR application for exploring and training on industrial environments. The platform itself is general-purpose; the version shown here hosts a model of a chemical processing plant, which users can walk through together, inspect, interact with, and question through an AI assistant.
+
+I'm the solo developer of the platform — the core digital-twin system, networking, VR/AR mode switching, Toy Mode, interaction logic, the permission model and the AI integration.
+
+## Shared sessions
+
+Several users join the same environment from their headsets and see each other's actions live. Sessions distinguish **admins**, who control modes, move the model and manage the shared experience, from **guests**, who explore with a limited interaction set — so a trainer can run a session without participants accidentally changing it for everyone.
+
+## VR, AR and Toy Mode
+
+Users switch between full virtual reality and passthrough augmented reality on Meta Quest 3 without leaving the session. In AR, **Toy Mode** lets the host shrink the plant to tabletop size, place it in the room and adjust it for inspection — a fast way to brief a group before walking them through the full-scale model.
+
+<Video id="5DEob7uocCE" caption="UI tour: modes, Toy Mode and session controls" />
+
+## A local AI assistant
+
+The assistant runs entirely on an NVIDIA DGX Spark on the local network — nothing goes to the cloud. Users ask about equipment by voice; the assistant answers and can identify or highlight the objects it's talking about inside the scene.
+
+The design principle is a clean split: **the AI decides *what* should happen, and the engine decides *how***. The model returns a structured command, and the application validates it and performs the action. That keeps behaviour predictable, keeps the model swappable, and is the same pattern later reused to drive physical robots in [Robots & Humans](/work/robots-and-humans) and [ROS voice control](/work/rosorin-voice-control).
+
+<Video id="UUiBSF8B6CM" caption="The local AI assistant answering questions and highlighting equipment" />
+
+## Tech
+
+| | |
+|---|---|
+| Engine | Godot 4 · GDScript |
+| Hardware | Meta Quest 3 · NVIDIA DGX Spark |
+| Focus | Multiplayer VR/AR, networking, interaction, AI assistant |

@@ -1,0 +1,68 @@
+---
+title: Bit Masking
+summary: A small Unity project that stores a player's collected abilities as bits in a single 8-bit integer and toggles them with bitwise operations.
+year: 2019
+status: prototype
+tier: archive
+categories: [math]
+tech: [unity, csharp]
+role: Solo developer
+teamSize: 1
+youtube: 5St-1I6J80c
+preview: /media/bit-masking/preview.mp4
+highlights:
+  - Five abilities packed into one 8-bit integer instead of a set of booleans
+  - A Flags enum with power-of-two values, so each ability maps to exactly one bit
+  - Pickups that set or clear a bit with a single bitwise operation
+aliases: [/bit-masking]
+---
+
+## Overview
+
+In this project I used bit masking to store several values in a single 8-bit integer and keep memory use down. It's a technique that suits game state like player abilities.
+
+The player collects abilities scattered around the level, and each one is a single bit in the integer. Collecting an ability switches its bit on, and some pickups switch one off. The on-screen counter shows the byte changing as you play. Besides saving memory, this keeps the logic simple: checking or updating an ability is one fast bitwise operation, which also makes the system easy to extend.
+
+## Technical breakdown
+
+Each ability is a power of two in a `[Flags]` enum (Magic, Charisma, Fly, Intelligence and Invisible), so it occupies exactly one bit:
+
+```csharp title="Ability.cs" {4-12}
+public class Ability : MonoBehaviour
+{
+    public bool deActive;
+    [Flags]
+    public enum Spell
+    {
+        Magic =1,
+        Charisma =2,
+        Fly = 4,
+        Intelligence = 8,
+        Invisible =16
+    }
+    public Spell MySpell;
+}
+```
+
+When the player touches an item, OR sets the item's bit. Items marked `deActive` clear it instead, with AND against the inverted mask:
+
+```csharp title="Item.cs" {10,14}
+public class Item : Ability
+{
+    private void OnTriggerEnter(Collider other)
+    {
+        Player playerItem = other.GetComponent<Player>();
+        if (playerItem != null)
+        {
+            if (deActive)
+            {
+                playerItem.myItem &= ~ (int) MySpell;
+            }
+            else if(!deActive)
+            {
+                playerItem.myItem |= (int) MySpell;
+            }
+        }
+    }
+}
+```

@@ -1,0 +1,29 @@
+---
+title: Vector Math Experiments
+summary: Three small Unity sketches in game maths covering dot-product sight checks, a ray that bounces off surfaces, and a cross-product coordinate system.
+year: 2021
+status: prototype
+tier: archive
+categories: [math]
+tech: [unity, csharp]
+role: Solo developer
+teamSize: 1
+preview: /media/vector-math-experiments/preview.mp4
+gallery:
+  - src: /media/vector-math-experiments/dot-product-sight.mp4
+    alt: Unity scene view of a gizmo showing an object's facing direction and view angle as it rotates relative to a target marker
+    caption: Dot product, used to tell whether something is in view
+  - src: /media/vector-math-experiments/cross-product-frame.mp4
+    alt: Unity scene view of spheres arranged around a moving marker in a coordinate system built with cross products, as it travels over a cube and a sphere
+    caption: A coordinate system built from cross products
+---
+
+## Overview
+
+Short Unity sketches where I practised the vector maths behind my games, mostly the dot and cross products, visualised with editor gizmos so I could see each result as I moved things around.
+
+## What I built
+
+- **Seeing with the dot product.** This detects when the player is looking at something by comparing the view direction with the direction to the object. The same idea drives the scarecrow and item pickup in [Scarecrow: Don't Look Away](/work/scarecrow-dont-look-away).
+- **Bouncy ray.** A ray that bounces off multiple surfaces, with each bounce worked out using the dot product. The loop at the top of the page shows it rebounding between two walls as its origin rotates.
+- **Cross-product coordinate system.** Building a full coordinate system from cross products, since the cross product of two vectors is perpendicular to both. The same tool picks the turning direction for the zombies in [Zombie Killer](/work/zombie-killer) and the collector in [Flag Collector](/work/flag-collector).

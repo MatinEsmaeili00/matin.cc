@@ -1,0 +1,43 @@
+---
+title: Building Visualization
+summary: GPU clipping, isolation and ghosting for digital-twin buildings in UE 5.8, where the CPU cost scales with clip volumes, not building size.
+year: 2026
+status: active
+tier: project
+priority: 55
+categories: [rendering, xr, tools]
+tech: [unreal, cpp, python, materials]
+role: Solo developer
+teamSize: 1
+context: Digital-twin R&D
+github: MatinEsmaeili00/BuildingVisualization
+highlights:
+  - One global parameter collection drives every clippable material — no per-mesh work
+  - A Python injector adds the clipping graph to a project's materials in one call
+  - Honest engineering log of what didn't work, and why
+---
+
+## Overview
+
+A digital twin of a real building can be hundreds of thousands of components across dozens of floors. The tools people want are simple — drag a box through a wall to see the pipes inside, select floor 8 and ghost everything else — but the obvious implementations all scale with the size of the building, which is exactly backwards.
+
+| Approach | Why it fails at scale |
+|---|---|
+| Swap materials on affected meshes | Thousands of asset touches per frame; hitches |
+| Hide whole actors | Only cuts at object granularity — you can't open *part* of a wall |
+| Per-mesh dynamic material instances | Every object needs its own parameters, updated every frame |
+| Boolean mesh operations | Nowhere near real-time |
+
+## The approach
+
+Clip volumes write their transforms into a single Material Parameter Collection, once per frame and only when something changed. Every clippable material reads that collection and evaluates the spatial test **per pixel** on the GPU, feeding Opacity Mask. The CPU never looks at the building: one mesh or four hundred thousand, the work is identical.
+
+The catch is that a per-pixel cut has to run in each material's shader. But meshes and materials aren't the same count — a 400,000-component building typically shares a few dozen materials, and injecting into a parent material covers all its instances. A Python editor script does the injection in one call, with a dry run first.
+
+## What didn't work
+
+The natural design — one material function every material calls — was built first and failed silently: connections made inside a material function through Unreal's Python API don't persist, so the graph saves with every node present and every wire missing. A single Custom HLSL node was next; it compiled and cut nothing, with one input binding impossible to inspect from outside. The current version builds the graph from native material nodes only, which removes every opaque link.
+
+## Status
+
+This is work in progress, and the repository documents it honestly. Verified: the collection carries the right values, the generated mask is correct (routed to Base Colour it draws a crisp box exactly inside the volume), and one real cause was found and fixed — `UMaterial::GetBlendMode()` reports **Opaque** for a Masked material when `bCanMaskedBeAssumedOpaque` is set. Still open: geometry inside the volume is drawn on some pre-existing materials even with a literal zero on Opacity Mask, while a freshly created material clips correctly. The next step is a controlled comparison of the two materials' compiled shaders. Clip volumes are currently axis-aligned.

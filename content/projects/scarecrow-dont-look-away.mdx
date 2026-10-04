@@ -1,0 +1,113 @@
+---
+title: "Scarecrow: Don't Look Away"
+summary: A first-person horror game where a scarecrow hunts you the moment you look away, with dot-product gaze checks and Poisson-disk forest maps.
+year: 2021
+status: shipped
+tier: archive
+categories: [games, math]
+tech: [unity, csharp, webgl, cinemachine, procedural-generation]
+role: Solo developer
+teamSize: 1
+context: Personal project
+youtube: Z-YPdLy7HHM
+videos:
+  - id: 7S8Eyjmg4BQ
+  - id: AW5sX-yfZks
+  - id: di49Gvd0IM8
+  - id: lXrRtRqlaCc
+links:
+  itch: https://m4tin.itch.io/scarecrow-do-not-look-away-v01
+preview: /media/scarecrow-dont-look-away/preview.mp4
+gallery:
+  - src: /media/scarecrow-dont-look-away/collecting.mp4
+    alt: Starting the tutorial from the main menu, with narration typing out over the moon before the camera drops to the forest and its glowing items
+    caption: Tutorial intro with typed narration
+  - src: /media/scarecrow-dont-look-away/shot-1.jpg
+    alt: The scarecrow standing among low-poly trees in the night-time forest, a glowing collectible on a tree beside it
+  - src: /media/scarecrow-dont-look-away/shot-2.jpg
+    alt: Close-up of a red collectible with the prompt to press E and the item counter, the scarecrow watching in the background
+  - src: /media/scarecrow-dont-look-away/shot-3.jpg
+    alt: Hand-drawn design notes on the player, the scarecrow and dot-product diagrams for deciding where the player is looking
+    caption: Design sketches for the gaze mechanic
+  - src: /media/scarecrow-dont-look-away/shot-4.jpg
+    alt: Hand-drawn notes working through Poisson disk sampling step by step, with the percentage split between tree types
+    caption: Working out Poisson disk sampling on paper
+highlights:
+  - A scarecrow that only moves when you look away, detected with a single dot product
+  - Collectibles that only count when you face them head-on
+  - A state-driven tutorial with Cinemachine camera moves and typewriter narration
+  - A player-facing map editor built on my Poisson disk sampling environment generator
+aliases: [/scarecrow-dont-look-away, /scarecrow-dont-look-away-ss, /scarecrow-dont-look-away-mobile-ss]
+---
+
+## Overview
+
+Scarecrow: Don't Look Away is a first-person horror adventure. You're stranded in a forest as an unwelcome stranger, and to escape you have to collect objects and deliver them to Mr. Box, all without ever looking away from the Scarecrow, the forest's guardian, or it will hunt you down.
+
+I built it solo in 2021. Its game-state system and look-at maths later carried over into [Zombie Killer](/work/zombie-killer).
+
+## What I built
+
+- **Game states.** A custom state system covers Start, Play, Pause, Win, Lose and End, and controls camera movement, UI panels, cursor visibility and game time so transitions stay clean.
+- **The Scarecrow.** It watches the player across the forest. Look away and it chases you down. This is pure vector maths: a dot product tells whether the player is looking at it.
+- **Collectibles.** Objects are placed at random on trees, and you have to look straight at one to collect it. You can't grab them from behind. The tension comes from juggling the two: collect quickly, or position yourself so the Scarecrow stays in view while you face the item.
+- **Tutorial.** A state-driven tutorial walks through each part of the game while telling the story, with Cinemachine camera moves and a typewriter text effect that waits for the player before moving on. When it ends, you're already playing on the same map.
+- **Map and map editor.** The forest is generated with my [Poisson disk sampling environment generator](/work/environment-generator), so the map changes every time you reset. The same tool powers a map editor where players set the ground size, the tree area, the density and the number of objects, and watch the forest update in real time. The spawn animation speeds up as density increases, so it scales with the map.
+
+## Technical breakdown
+
+### Don't look away
+
+The Scarecrow always turns to face the player. Comparing its forward vector with the reverse of the camera's forward vector gives a single "lookness" value: near 1 when you're looking straight at it, lower as you turn away. Below 0.5, and once you're outside the safe radius around your base, it starts moving toward you. Within 4 units, you lose.
+
+```csharp title="Monster.cs" {4,6,11,15}
+void Update()
+{
+    LookAtPlayer(transform, player.transform);
+    float lookness = Vector3.Dot(transform.forward, -playerCam.transform.forward);
+    distance = (transform.position - player.transform.position).magnitude;
+    if (lookness<0.5f&&isPlayerOutOfBase(player,playerBase,baseArea))
+    {
+        float distanceLeft = distance;
+        if (distanceLeft>4f)
+        {
+            transform.position += vecBetween.normalized * speed * Time.deltaTime;
+        }
+        else if (distanceLeft<=4f)
+        {
+            GameState.MyGameStates=GameState.GameStates.Lose;
+        }
+    }
+}
+```
+
+Collecting uses the same idea in reverse: a short raycast finds the item, and a dot product between the item's forward vector and the camera's direction (greater than 0.6) confirms you're facing its front.
+
+### Typewriter narration
+
+The tutorial's dialogue is typed out by a coroutine. The "next" button only appears once `isTextTypingFinished` is set, so the player can't skip ahead mid-sentence.
+
+```csharp title="TutorialStates.cs" {10-13,17}
+IEnumerator TypeText(string textToType,TMP_Text textLabel)
+{
+    isTextTypingFinished = false;
+    textLabel.text = string.Empty;
+    yield return new WaitForSeconds(1);
+    float t = 0;
+    int charIndex = 0;
+    while (charIndex<textToType.Length)
+    {
+        t += Time.deltaTime*typeWriterSpeed;
+        charIndex = Mathf.FloorToInt(t);
+        charIndex = Mathf.Clamp(charIndex, 0, textToType.Length);
+        textLabel.text = textToType.Substring(0, charIndex);
+        yield return null;
+    }
+    textLabel.text = textToType;
+    isTextTypingFinished = true;
+}
+```
+
+## Reference
+
+WebGL build, playable in the browser on itch.io. Uses Unity's Cinemachine package and Polygon Trees by [Alebrijes Studio](https://assetstore.unity.com/publishers/51132). Thanks to [Sebastian Lague](https://www.youtube.com/c/SebastianLague) and [The Coding Train](https://www.youtube.com/c/TheCodingTrain) for their explanations of Poisson disc sampling, and to [Freya Holmér](https://www.youtube.com/c/Acegikmo) for her free course on maths for game development. Every rotation and look direction in the game is written with plain vector maths.

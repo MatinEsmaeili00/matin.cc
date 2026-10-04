@@ -1,0 +1,26 @@
+# Repositories and YouTube videos deliberately NOT on the portfolio.
+# `npm run audit:sources` skips everything listed here.
+# One GitHub repo name or YouTube video id per line; "#" starts a comment.
+
+# Course material / docs, not portfolio pieces
+AddingUnitytoGit
+Godot-VR-My-Document
+
+# Hardware notes — the work is covered by rosorin-voice-control and robots-and-humans
+Robot-ROSOrin-Pro
+
+# Pending your decision (see docs/MIGRATION.md → "GitHub-only work")
+sam2-unity
+sam3-claude
+active-contour-snakes-claude
+active-contour-snakes-claude2
+temporal-tracking-claude
+
+# Short-form cuts of videos already on the site
+DdOMXmzRXq4
+kiAlWDAyIFg
+t2fzyS48Gu8
+Kwj_PJKkkf4
+930XUr4RvLM
+pRVbGKd0LaI
+qMMjTW7oq4s

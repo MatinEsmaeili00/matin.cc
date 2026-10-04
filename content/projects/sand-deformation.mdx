@@ -1,0 +1,91 @@
+---
+title: Sand Deformation
+summary: GPU sand for UE 5.8 that slumps at its angle of repose, rings with wave-equation ripples on impact and throws grains when you land.
+year: 2026
+status: active
+tier: featured
+priority: 95
+categories: [rendering, tools, math]
+tech: [unreal, cpp, hlsl, compute-shaders, rdg, gpu-simulation, niagara, materials]
+role: Solo developer
+teamSize: 1
+context: Personal R&D
+github: MatinEsmaeili00/SandDeformation
+highlights:
+  - Mass-conserving slump solver that collapses slopes steeper than ~34°, one Jacobi step per frame
+  - 2D wave equation for ripples, with the speed clamped to the CFL stability limit in-shader
+  - Absorbing "sponge" boundary so rings don't reflect back off the edge of the simulated region
+  - Landing and jump detection that digs craters, piles rims and fires Niagara grain bursts
+metrics:
+  - value: "34°"
+    label: default angle of repose
+  - value: "4×"
+    label: wave sub-steps per frame
+  - value: "RGBA32F"
+    label: height, ripple, velocity, disturbance
+  - value: "2"
+    label: compute passes per frame
+---
+
+## Overview
+
+Sand Deformation started as a companion to [Snow Deformation](/work/snow-deformation) and turned into a different problem entirely. Snow holds whatever shape you press into it. Sand doesn't: pile it too steeply and it collapses, hit it and a ring spreads outwards, land in it and grains fly. The plugin keeps the world-anchored scrolling-region technique from the snow system and replaces all of the physics.
+
+## What makes sand different
+
+| | Snow | Sand |
+|---|---|---|
+| **Slopes** | Holds any shape | Collapses past its angle of repose |
+| **Waves** | None | Ripples propagate from impacts |
+| **Rim** | Only written on undisturbed snow | Written freely — slumping keeps it physical |
+| **Height** | Normalised, positive = pressed down | Signed **world units**, positive = piled up |
+| **Idle** | Free once nothing touches it | Keeps simulating while ripples ring out |
+
+The height convention flip matters: "material flows downhill" is only simple to write when up is positive, and the slump solver compares real slopes against a real angle, so the numbers have to be world units.
+
+## Simulation state
+
+Everything lives in one RGBA32F texture, ping-ponged between frames: `R` is the persistent height, `G` the transient ripple height, `B` the ripple velocity and `A` a decaying disturbance mask that drives material effects. A second pass combines static and ripple height into normals for the material.
+
+```text title="Pass 1 · SandSimulateCS" nolines
+reproject last frame into this frame's region
+slump  — collapse slopes past the angle of repose
+ripple — integrate the 2D wave equation (sub-stepped)
+stamp  — press craters, pile rims, kick the wave field
+```
+
+## Slumping at the angle of repose
+
+Dry sand can't hold a slope steeper than about 34°. For each neighbour, any height difference beyond what that angle allows is moved downhill. The update is exactly conservative: for a pair of texels the differences are equal and opposite, so whatever one gives away the other receives on its own thread — no sand is created or destroyed, and no atomics are needed.
+
+<GitHubCode path="Shaders/Private/SandDeformation.usf" lines="112-143" highlight="122-140" />
+
+It's a single Jacobi iteration per frame, so a steep pile converges over a few frames rather than instantly. That reads as sand settling — a case where the cheap solver is also the better-looking one.
+
+## Ripples: the wave equation, kept stable
+
+Ripples integrate `∂²h/∂t² = c²∇²h` as a velocity field using the standard 5-point Laplacian. An explicit solver like this is only stable while `c·Δt/Δx` stays below ~0.7 in 2D; past that it diverges within a few frames. Rather than trust whoever typed in the speed, the shader clamps it to what the current texel size and frame time can carry.
+
+<GitHubCode path="Shaders/Private/SandDeformation.usf" lines="145-177" highlight="152-162" />
+
+## Challenges
+
+### Rings that came back
+
+The Laplacian clamps its reads at the texture border, which makes the edge a perfectly reflecting wall. Because the region is centred on the player, a ring that reached the edge came back through them from every side at once. The fix is a damping "sponge" that ramps up steeply over the outer 6% of the region and soaks waves up before they arrive — a cheap stand-in for a true radiating boundary.
+
+### The ghost mound
+
+The zero-frequency mode of the wave field has a zero Laplacian, so it feels no restoring force: any net impulse that survives leaves a uniform lift that velocity damping can never remove — a phantom mound following the player around. The impulse profile is a normalised Laplacian-of-Gaussian that injects almost no zero-frequency energy, and a gentle pull on the height itself drains whatever remains without shortening the life of real rings.
+
+### Sub-stepping
+
+At one iteration per frame a ring dies within a metre. `RippleSubSteps` (default 4) is what lets ripples actually travel — and shrinking the region sharpens detail but also lowers the speed cap, a trade-off the tuning docs make explicit.
+
+## Impacts and particles
+
+Landing binds `ACharacter::LandedDelegate`, with strength scaled between a minimum and maximum landing speed so stepping off a kerb does nothing and a long fall digs a real crater. Jump take-off is detected as the frame the character starts falling with upward velocity. Both dig, pile and kick the wave field, and fire `OnSandImpact` plus an optional Niagara system that receives `User.ImpactStrength` and `User.IsLanding` — so grains are optional, not hard-wired.
+
+## Results
+
+Like its snow sibling, the plugin ships with a full documentation set — architecture, a derivation of the sand physics, a line-by-line shader walkthrough, a C++ reference, impacts and particles, material wiring, and tuning — written so someone can rebuild it from scratch.

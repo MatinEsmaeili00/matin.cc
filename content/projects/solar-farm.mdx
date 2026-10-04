@@ -1,0 +1,44 @@
+---
+title: Solar Farm Digital Twin
+summary: Rendering systems for the LSU Solar Farm twin — a compute-shader light-intensity heatmap and GPU PCG growth driven by sunlight.
+year: 2025
+yearEnd: present
+status: active
+tier: featured
+priority: 80
+categories: [rendering, xr]
+tech: [unreal, cpp, hlsl, compute-shaders, post-processing, pcg, procedural-generation]
+role: Rendering engineer
+context: LSU Solar Farm
+youtube: hiY68P8mXWI
+preview: /media/solar-farm/preview.mp4
+aliases: [/solar-farm, /sf]
+highlights:
+  - A light-intensity heatmap computed on the GPU and injected into the renderer with a Scene View Extension
+  - Packaged as a plugin with an Engine Subsystem — no engine modifications
+  - GPU-side procedural plant generation with Unreal's PCG compute
+---
+
+## Overview
+
+The LSU Solar Farm project builds a digital twin of the university's solar installation. I joined in 2025 as the rendering engineer, responsible for two systems: a **heatmap** that visualizes how much sunlight reaches every part of the site, and a **plant generator** that will grow vegetation according to that light.
+
+## Light-intensity heatmap
+
+The heatmap reads the sunlight information in the scene and replaces it with colour by intensity: fully lit areas turn red, shadowed areas blue, and everything in between blends smoothly — turning the whole level into a readable map of exposure.
+
+It's a compute shader living inside a plugin. Rather than modify the engine, it hooks into the renderer through a custom **Scene View Extension**, with an **Engine Subsystem** managing its lifetime, so it can be dropped into any project.
+
+### The view-dependence problem
+
+The first version derives intensity from the **GBuffer**. That's fast, but the GBuffer only describes what the current camera sees — so the heatmap changes as the camera moves, which is wrong for an analysis tool. I'm now working on a version that estimates light intensity with basic ray tracing, making the result camera-independent and more accurate.
+
+<Clip src="/media/solar-farm/preview.mp4" caption="Heatmap pass: sunlit surfaces in red, shadow in blue" />
+
+## Light-driven plant growth
+
+The second system uses Unreal's **PCG** framework with its GPU compute path. So far I've used it to generate fractal structures directly on the GPU; the next step connects it to the light-intensity data so plants spawn and grow — or shrink back — according to how much sun each area receives.
+
+<Clip src="/media/solar-farm/pcg-fractal.mp4" caption="A fractal generated with PCG compute" />
+
+Credit to renderBucket's [PCG Compute introduction](https://www.youtube.com/watch?v=VKx3Jfp56RE) for an excellent explanation of the framework.

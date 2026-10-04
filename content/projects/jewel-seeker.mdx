@@ -1,0 +1,25 @@
+---
+title: Jewel Seeker
+summary: A team-made Unity game. Cross three layered levels, collect gems and evade enemies driven by grid pathfinding, NavMesh and a state-based Observer.
+year: 2026
+status: shipped
+tier: archive
+categories: [games]
+tech: [unity, csharp, webgl]
+role: Developer
+github: MatinEsmaeili00/Jewel-Seeker
+links:
+  demo: https://play.unity.com/en/games/8a46dc2a-70ca-4846-8d0e-1265cb7d63b8/jewel-seeker
+---
+
+## Overview
+
+Jewel Seeker is a Unity game made as a team project. The player makes their way through a terrifying land, collecting jewels to purify it while avoiding enemies. It's playable in the browser on Unity Play, and the code and its history are on [GitHub](https://github.com/MatinEsmaeili00/Jewel-Seeker).
+
+I worked on it as one of the developers on the team.
+
+## Technical breakdown
+
+- **Enemy AI.** Enemies move with grid-based, A*-style pathfinding (`GridPathfinder2D`) and with Unity NavMesh agents. The Observer enemy runs a state machine with follow, agro, attack and flee states.
+- **Player movement.** Stamina, dash and crouch.
+- **Levels.** Three layered levels with gems to pick up along the way.

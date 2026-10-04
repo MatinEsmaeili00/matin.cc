@@ -1,0 +1,101 @@
+---
+title: House Simulation 1
+summary: An interactive Unity digital twin of a 110 m² house in Niavaran, Tehran, where visitors explore the rooms, sit in any chair and pick up objects.
+year: 2022
+status: shipped
+tier: archive
+categories: [xr]
+tech: [unity, csharp, cinemachine]
+role: Main developer & programmer
+teamSize: 3
+youtube: yaunqZENsT8
+videos:
+  - id: D5dt-LJH4xM
+  - id: ek2wKc8agI8
+  - id: ldCuHPfNDTc
+  - id: t2fzyS48Gu8
+links:
+  itch: https://m4tin.itch.io/house-simulator-01
+preview: /media/house-simulation-1/preview.mp4
+gallery:
+  - src: /media/house-simulation-1/sitting.mp4
+    alt: Sitting on a seat in the living room and switching between chairs to see the space from different viewpoints
+    caption: Sitting interaction
+  - src: /media/house-simulation-1/picking.mp4
+    alt: Picking up a household object from the dining table and holding it in front of the camera
+    caption: Picking up objects
+  - src: /media/house-simulation-1/radial-ui.mp4
+    alt: The minimal circular action menu offering actions such as sitting or picking up for the object under the cursor
+    caption: Radial interaction menu
+  - src: /media/house-simulation-1/shot-1.jpg
+    alt: Unity editor view of the living room with a reflection probe selected
+    caption: Reflection probes for realistic reflections
+  - src: /media/house-simulation-1/shot-2.jpg
+    alt: Unity editor view of the living room with a point light selected
+    caption: Point lights for small light sources
+  - src: /media/house-simulation-1/shot-3.jpg
+    alt: Unity editor view of a wall lit by ceiling spotlights, with a spot light selected
+    caption: Spotlights for ceiling lights
+  - src: /media/house-simulation-1/shot-4.jpg
+    alt: Unity editor view of the TV room with an area light selected at the window
+    caption: Area lights for daylight from the windows
+highlights:
+  - Smooth camera tours through the house along Cinemachine paths
+  - One short sitting script that works with any chair, using a custom Sitable layer
+  - A universal pickup script for objects of any size and rotation, with picture albums turned to face the player
+  - A lighting setup with point, spot and area lights plus reflection probes
+aliases: [/house-simulation-1, /demo1, /house-simulation-ss]
+---
+
+## Overview
+
+An interactive digital twin of a modernised house in Niavaran, Tehran, built for architectural visualization. The 110 m² model covers the kitchen, TV room and living room. Visitors can pick up household objects like candles, forks and flowers, or sit in different chairs to experience the space from different viewpoints.
+
+We were a team of three, and I was the main developer and programmer.
+
+## What I built
+
+- **Camera movement.** Smooth transitions between areas of the house, using Cinemachine smooth paths.
+- **Sitting.** A short, general script lets the player sit in any chair and switch between chairs. Sittable objects are identified by a custom `Sitable` layer, so it scales to different chair types without extra code.
+- **Picking up objects.** One universal pickup script handles objects of different sizes and rotations. Picture albums are a special case: they turn to face the player when picked up, so the photos are easy to see.
+- **Lighting.** Point lights for small sources like lamps, spotlights for ceiling lights, area lights for daylight coming through the windows, and reflection probes for more realistic reflections on surfaces.
+- **UI.** A simple circular menu that fits the modern interior. It lets players choose actions like sitting or picking up, and leaves room for more actions later. The radial layout was inspired by GTA V and The Sims.
+
+## Technical breakdown
+
+UI buttons and interaction logic are decoupled with C# delegates. The button controller raises `onSitClicked` or `onPickClicked`, and the sitting and pickup components subscribe in `OnEnable` and unsubscribe in `OnDisable`. The pickup component then places a copy of the object in front of the camera, using the object's layer to choose how to orient it:
+
+```csharp title="PickObject.cs" {3,7,21-25}
+private void OnEnable()
+{
+    InsideGameButtonController.onPickClicked += PickingObject;
+}
+private void OnDisable()
+{
+    InsideGameButtonController.onPickClicked-= PickingObject;
+}
+void PickingObject()
+{
+    GameStates.isHandFull = true;
+    pickingCanvas.SetActive(true);
+    Transform parentOfLookTransform = PlayerLook.objectPicked.transform.parent.transform;
+    GameObject inFront = Instantiate(PlayerLook.objectPicked, Vector3.one, Quaternion.identity);
+    if (PlayerLook.objectPicked.gameObject.layer == LayerMask.NameToLayer("Collectable"))
+    {
+        inFront.transform.parent = inFrontOfCamera.transform;
+        inFront.transform.localPosition = Vector3.zero;
+        inFront.transform.localEulerAngles = new Vector3(parentOfLookTransform.localEulerAngles.x-parentOfLookTransform.localEulerAngles.y,0,0);
+    }
+    else if (PlayerLook.objectPicked.gameObject.layer == LayerMask.NameToLayer("CollectablePicture"))
+    {
+        inFront.transform.parent = inFrontOfCamera.transform;
+        inFront.transform.localPosition = Vector3.zero;
+        inFront.transform.localEulerAngles = new Vector3(0,180,0);
+    }
+    PlayerLook.objectPicked.SetActive(false);
+}
+```
+
+## Reference
+
+Windows build, available on itch.io. Built with Unity's Cinemachine package. The follow-up, [House Simulation 2](/work/house-simulation-2), adds colour customization to the same approach.
