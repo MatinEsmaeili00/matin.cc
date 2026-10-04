@@ -15,7 +15,7 @@ export type ExplorerItem = {
   node: ReactNode;
 };
 
-type Option = { id: string; label: string; dot?: boolean };
+type Option = { id: string; label: string; dot?: boolean; color?: string; dark?: string };
 
 type Filters = { category: string | null; tech: string[]; q: string };
 
@@ -110,6 +110,8 @@ export function ProjectExplorer({
                 <Chip
                   key={t.id}
                   small
+                  color={t.color}
+                  darkColor={t.dark}
                   pressed={filters.tech.includes(t.id)}
                   count={filters.tech.includes(t.id) ? undefined : countFor({ tech: [...filters.tech, t.id] })}
                   onClick={() => toggleTech(t.id)}

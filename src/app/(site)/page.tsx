@@ -12,9 +12,6 @@ import { getAllProjects, toSummary } from "@/lib/content/projects";
 import { personJsonLd, JsonLd } from "@/lib/seo";
 import { resumeHref } from "@/lib/site-links";
 
-/** The work-in-progress section gets a live "cooking" indicator. */
-const LIVE_SECTION = "lab";
-
 export default async function HomePage() {
   const projects = await getAllProjects();
   const active = projects.filter((p) => p.status === "active").slice(0, 4);
@@ -37,15 +34,10 @@ export default async function HomePage() {
 
       <div id="work" className="mt-24 scroll-mt-14 md:mt-32">
         <SectionNav
-          sections={sections.map(({ section, count }) => ({
-            id: section.id,
-            title: section.title,
-            count,
-            live: section.id === LIVE_SECTION,
-          }))}
+          sections={sections.map(({ section, count }) => ({ id: section.id, title: section.title, count }))}
         />
         {sections.map(({ section, members }) => (
-          <HomeSection key={section.id} section={section} projects={members} live={section.id === LIVE_SECTION} />
+          <HomeSection key={section.id} section={section} projects={members} />
         ))}
       </div>
 

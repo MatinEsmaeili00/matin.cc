@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ProjectSummary } from "@/lib/content/projects";
-import { techLabels } from "./format";
+import { TechTags } from "./tech-tags";
 
 /** Compact, text-only rows for older work: findable without competing visually. */
 export function ArchiveList({ projects }: { projects: ProjectSummary[] }) {
@@ -26,9 +26,7 @@ export function ArchiveRow({ project }: { project: ProjectSummary }) {
         <span className="font-semibold tracking-tight transition-colors group-hover:text-accent">{project.title}</span>
         <span className="mt-1 block truncate text-sm text-fg-muted">{project.summary}</span>
       </span>
-      <span className="label col-start-2 truncate sm:col-start-auto sm:text-right">
-        {techLabels(project.tech, 3).join(" · ")}
-      </span>
+      <TechTags tech={project.tech} limit={3} plain className="col-start-2 sm:col-start-auto sm:justify-end" />
     </Link>
   );
 }

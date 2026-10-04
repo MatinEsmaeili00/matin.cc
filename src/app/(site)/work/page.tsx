@@ -3,7 +3,7 @@ import { ArchiveRow } from "@/components/project/archive-list";
 import { categoryLabels, techLabels } from "@/components/project/format";
 import { ProjectCard } from "@/components/project/project-card";
 import { ProjectExplorer, type ExplorerItem } from "@/components/project/project-explorer";
-import { CATEGORIES, TECH, TECH_IDS } from "@/config/taxonomy";
+import { CATEGORIES, TECH, TECH_IDS, techColor } from "@/config/taxonomy";
 import { byRecency, getAllProjects, toSummary } from "@/lib/content/projects";
 
 export const metadata: Metadata = {
@@ -36,7 +36,7 @@ export default async function WorkPage() {
   const usedCategories = CATEGORIES.filter((c) => projects.some((p) => p.categories.includes(c.id)));
   const techCount = (id: string) => projects.filter((p) => (p.tech as string[]).includes(id)).length;
   const usedTech = TECH_IDS.filter((id) => techCount(id) > 0);
-  const option = (id: (typeof TECH_IDS)[number]) => ({ id, label: TECH[id].label });
+  const option = (id: (typeof TECH_IDS)[number]) => ({ id, label: TECH[id].label, ...techColor(id) });
 
   return (
     <>

@@ -4,13 +4,14 @@ import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 import { getMDXComponents } from "@/components/mdx/mdx-components";
 import { ProjectMedia } from "@/components/media/project-media";
-import { categoryLabels, STATUS_LABEL } from "@/components/project/format";
+import { categoryLabels } from "@/components/project/format";
 import { Gallery } from "@/components/project/gallery";
 import { PieceGrid } from "@/components/project/item-card";
 import { Metrics } from "@/components/project/metrics";
 import { ProjectFacts } from "@/components/project/project-facts";
 import { ProjectHeroMedia } from "@/components/project/project-hero-media";
 import { ProjectLinks } from "@/components/project/project-links";
+import { Status } from "@/components/project/status";
 import { RepositoryPanel } from "@/components/project/repository-panel";
 import { Toc } from "@/components/project/toc";
 import { VideoList } from "@/components/project/video-list";
@@ -66,7 +67,7 @@ export default async function ProjectPage(props: PageProps<"/work/[slug]">) {
         </Link>
 
         <p className="label mt-8 md:mt-12">
-          {categoryLabels(project.categories).join(" / ")} · {project.period} · {STATUS_LABEL[project.status]}
+          {categoryLabels(project.categories).join(" / ")} · {project.period} · <Status status={project.status} />
         </p>
         <h1 className="mt-4 max-w-[18ch] text-title font-semibold tracking-[-0.035em] text-balance semi-wide">
           {project.title}
@@ -148,7 +149,7 @@ export default async function ProjectPage(props: PageProps<"/work/[slug]">) {
               <p className="label">Next project</p>
               <p className="mt-3 flex items-center gap-4 text-heading font-semibold tracking-tight semi-wide group-hover:text-accent">
                 {next.title}
-                <ArrowRight className="size-5 shrink-0 transition-transform group-hover:translate-x-1" />
+                <ArrowRight className="size-5 shrink-0" />
               </p>
               <p className="mt-3 text-fg-muted">{next.summary}</p>
             </div>

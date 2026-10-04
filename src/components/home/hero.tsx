@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ButtonLink } from "@/components/ui/button";
 import { ArrowRight, Download, Mail } from "@/components/ui/icons";
+import { LiveDot } from "@/components/ui/live-dot";
 import { site } from "@/config/site";
 import type { ProjectSummary } from "@/lib/content/projects";
 import { resumeHref } from "@/lib/site-links";
@@ -59,7 +60,7 @@ export async function Hero({ active }: { active: ProjectSummary[] }) {
           <p className="text-lead text-fg-muted">{site.tagline}</p>
 
           <div className="mt-8 flex flex-wrap gap-3">
-            <ButtonLink href="#work" icon={<ArrowRight className="size-3.5 rotate-90" />}>
+            <ButtonLink href="#work" icon={<ArrowRight className="size-3.5 rotate-90" data-nudge="down" />}>
               View my work
             </ButtonLink>
             {resume && (
@@ -82,7 +83,7 @@ export async function Hero({ active }: { active: ProjectSummary[] }) {
                       href={p.url}
                       className="inline-flex min-h-8 items-center gap-2 text-sm text-fg underline decoration-line-strong underline-offset-4 transition-colors hover:decoration-accent"
                     >
-                      <span aria-hidden className="size-1.5 rounded-full bg-accent" />
+                      <LiveDot className="text-accent" />
                       {p.title}
                     </Link>
                   </li>

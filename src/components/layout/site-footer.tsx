@@ -28,7 +28,7 @@ export function SiteFooter() {
               <li key={link.href}>
                 <a href={link.href} rel="me noopener" target="_blank" className="group inline-flex items-center gap-2 py-1 text-fg-muted transition-colors hover:text-fg">
                   {link.label}
-                  <ArrowUpRight className="size-2.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                  <ArrowUpRight className="size-2.5" />
                 </a>
               </li>
             ))}
@@ -36,7 +36,7 @@ export function SiteFooter() {
               <li>
                 <a href={resume} className="group inline-flex items-center gap-2 py-1 text-fg-muted transition-colors hover:text-fg">
                   Résumé (PDF)
-                  <ArrowUpRight className="size-2.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                  <ArrowUpRight className="size-2.5" />
                 </a>
               </li>
             )}

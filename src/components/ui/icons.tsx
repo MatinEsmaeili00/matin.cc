@@ -1,7 +1,12 @@
 import type { SVGProps } from "react";
 
-type IconProps = SVGProps<SVGSVGElement>;
+type IconProps = SVGProps<SVGSVGElement> & { "data-nudge"?: "right" | "left" | "down" | "up-right" };
 
+/*
+ * Arrows and Download carry data-nudge: they lean toward where their link goes
+ * while it's hovered (globals.css). Override it, e.g. data-nudge="down" on a
+ * rotated arrow.
+ */
 const base = {
   "aria-hidden": true,
   fill: "none",
@@ -11,7 +16,7 @@ const base = {
 
 export function ArrowUpRight(props: IconProps) {
   return (
-    <svg viewBox="0 0 12 12" {...base} {...props}>
+    <svg viewBox="0 0 12 12" {...base} data-nudge="up-right" {...props}>
       <path d="M3 9 9 3M4 3h5v5" />
     </svg>
   );
@@ -19,7 +24,7 @@ export function ArrowUpRight(props: IconProps) {
 
 export function ArrowRight(props: IconProps) {
   return (
-    <svg viewBox="0 0 14 12" {...base} {...props}>
+    <svg viewBox="0 0 14 12" {...base} data-nudge="right" {...props}>
       <path d="M1 6h12M8 1l5 5-5 5" />
     </svg>
   );
@@ -27,7 +32,7 @@ export function ArrowRight(props: IconProps) {
 
 export function ArrowLeft(props: IconProps) {
   return (
-    <svg viewBox="0 0 14 12" {...base} {...props}>
+    <svg viewBox="0 0 14 12" {...base} data-nudge="left" {...props}>
       <path d="M13 6H1M6 1 1 6l5 5" />
     </svg>
   );
@@ -85,7 +90,7 @@ export function Moon(props: IconProps) {
 
 export function Download(props: IconProps) {
   return (
-    <svg viewBox="0 0 16 16" {...base} strokeWidth={1.4} {...props}>
+    <svg viewBox="0 0 16 16" {...base} strokeWidth={1.4} data-nudge="down" {...props}>
       <path d="M8 2v8M4.5 6.5 8 10l3.5-3.5M2.5 13.5h11" />
     </svg>
   );

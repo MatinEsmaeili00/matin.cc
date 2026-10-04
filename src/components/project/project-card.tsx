@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { ProjectMedia } from "@/components/media/project-media";
 import type { ProjectSummary } from "@/lib/content/projects";
-import { categoryLabels, techLabels } from "./format";
+import { categoryLabels } from "./format";
+import { TechTags } from "./tech-tags";
 
 /** Grid card: the visual leads, text stays to one glance. */
 export function ProjectCard({
@@ -11,8 +12,6 @@ export function ProjectCard({
   project: ProjectSummary;
   sizes?: string;
 }) {
-  const tech = techLabels(project.tech, 3);
-
   return (
     <article className="group" data-preview-root>
       <Link href={project.url} className="block focus-visible:outline-offset-4">
@@ -31,7 +30,7 @@ export function ProjectCard({
           <span className="label shrink-0">{project.year}</span>
         </div>
         <p className="mt-2 line-clamp-2 text-[0.9375rem] leading-relaxed text-fg-muted">{project.summary}</p>
-        {tech.length > 0 && <p className="label mt-3">{tech.join(" · ")}</p>}
+        <TechTags tech={project.tech} limit={3} className="mt-3" />
       </Link>
     </article>
   );

@@ -4,7 +4,9 @@ import { ArrowRight, ArrowUpRight } from "@/components/ui/icons";
 import type { Project } from "@/lib/content/projects";
 import { githubRepoUrl } from "@/lib/refs";
 import { cn, pad2 } from "@/lib/utils";
-import { categoryLabels, STATUS_LABEL, teamLabel, techLabels } from "./format";
+import { categoryLabels, teamLabel, techLabels } from "./format";
+import { Status } from "./status";
+import { TechTags } from "./tech-tags";
 
 /**
  * A full-width "film strip" row for featured work. Media takes two thirds of
@@ -30,7 +32,7 @@ export function FeaturedProject({ project, index }: { project: Project; index: n
         <span className="text-accent">{pad2(index + 1)}</span>
         <span>
           {categoryLabels(project.categories).slice(0, 2).join(" / ")} · {project.period} ·{" "}
-          {STATUS_LABEL[project.status]}
+          <Status status={project.status} />
         </span>
       </header>
 
@@ -70,9 +72,7 @@ export function FeaturedProject({ project, index }: { project: Project; index: n
           </dl>
         )}
 
-        {project.tech.length > 0 && (
-          <p className="label mt-6 leading-relaxed">{techLabels(project.tech, 6).join(" · ")}</p>
-        )}
+        <TechTags tech={project.tech} limit={6} className="mt-6" />
 
         <div className="mt-8 flex flex-wrap items-center gap-x-8 gap-y-3 md:mt-auto md:pt-8">
           <Link

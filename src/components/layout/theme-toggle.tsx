@@ -28,8 +28,9 @@ export function ThemeToggle({ className }: { className?: string }) {
       title="Toggle dark theme"
       className={`flex size-10 items-center justify-center rounded-md text-fg-muted transition-colors hover:bg-ink-3 hover:text-fg ${className ?? ""}`}
     >
-      <Moon className="size-4 [[data-theme=dark]_&]:hidden" />
-      <Sun className="hidden size-4 [[data-theme=dark]_&]:block" />
+      {/* icon-pop replays whenever an icon is un-hidden, so it plays on every toggle. */}
+      <Moon className="icon-pop size-4 [[data-theme=dark]_&]:hidden" />
+      <Sun className="icon-pop hidden size-4 [[data-theme=dark]_&]:block" />
     </button>
   );
 }

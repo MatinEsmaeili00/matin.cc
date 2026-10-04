@@ -1,15 +1,18 @@
+import type { ReactNode } from "react";
 import type { Project } from "@/lib/content/projects";
-import { STATUS_LABEL, teamLabel, techLabels } from "./format";
+import { teamLabel } from "./format";
+import { Status } from "./status";
+import { TechTags } from "./tech-tags";
 
 /** Role / team / context / timeline / status / stack — whatever the project defines. */
 export function ProjectFacts({ project }: { project: Project }) {
-  const facts = [
+  const facts: { term: string; detail: ReactNode }[] = [
     { term: "Role", detail: project.role },
     { term: "Team", detail: teamLabel(project.teamSize) },
     { term: "Context", detail: project.context },
     { term: "Timeline", detail: project.period },
-    { term: "Status", detail: STATUS_LABEL[project.status] },
-  ].filter((f): f is { term: string; detail: string } => Boolean(f.detail));
+    { term: "Status", detail: <Status status={project.status} /> },
+  ].filter((f) => Boolean(f.detail));
 
   return (
     <dl className="grid grid-cols-2 border-t border-line sm:grid-cols-3 lg:grid-cols-6">
@@ -22,7 +25,9 @@ export function ProjectFacts({ project }: { project: Project }) {
       {project.tech.length > 0 && (
         <div className="col-span-full border-b border-line py-4">
           <dt className="label">Stack</dt>
-          <dd className="mt-1.5 text-[0.9375rem] leading-relaxed text-fg">{techLabels(project.tech).join(" · ")}</dd>
+          <dd className="mt-2.5">
+            <TechTags tech={project.tech} />
+          </dd>
         </div>
       )}
     </dl>

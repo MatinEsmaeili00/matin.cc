@@ -2,12 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
+import { SectionIcon } from "./section-icon";
 
 /**
  * Sticky jump-bar for the homepage sections (like the old site's tabs).
- * Highlights the section currently in view.
+ * Highlights the section currently in view. Each section shows its animated icon.
  */
-export function SectionNav({ sections }: { sections: { id: string; title: string; count: number; live?: boolean }[] }) {
+export function SectionNav({ sections }: { sections: { id: string; title: string; count: number }[] }) {
   const [current, setCurrent] = useState<string | null>(null);
 
   useEffect(() => {
@@ -38,12 +39,9 @@ export function SectionNav({ sections }: { sections: { id: string; title: string
                   : "border-line-strong text-fg-muted hover:border-fg hover:text-fg",
               )}
             >
-              {s.live && (
-                <span aria-hidden className="relative flex size-2">
-                  <span className="absolute inline-flex size-full animate-ping rounded-full bg-accent opacity-60 motion-reduce:animate-none" />
-                  <span className="relative inline-flex size-2 rounded-full bg-accent" />
-                </span>
-              )}
+              <span className={cn("flex", current !== s.id && "text-accent")}>
+                <SectionIcon id={s.id} />
+              </span>
               {s.title}
               <span className={current === s.id ? "text-ink/60" : "text-fg-faint"}>{s.count}</span>
             </a>

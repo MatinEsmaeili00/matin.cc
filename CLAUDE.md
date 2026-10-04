@@ -4,7 +4,7 @@
 
 Graphics / rendering engineer, technical artist, real-time simulation developer.
 Next.js 16 (App Router) + React 19 + TypeScript + Tailwind CSS 4 + Keystatic (CMS).
-Repo: github.com/MatinEsmaeili00/matin.cc (private). Domain: https://matin.cc (host not chosen yet — see Deployment).
+Repo: github.com/MatinEsmaeili00/matin.cc (public). Domain: https://matin.cc (host not chosen yet — see Deployment).
 
 The site is **data-driven**: every project is one MDX file. Pages, cards, filters, sitemap, OG images,
 redirects and structured data are all generated from those files. Never hand-build a page for a project.
@@ -51,7 +51,7 @@ yt-dlp downloads itself into `.cache/` the first time `npm run media` gets a You
 | Name, roles, intro, links, email, résumé, photo, showreel | `content/settings/site.json` (typed by `src/config/site.ts`) | CMS → Site settings |
 | Categories (disciplines, used by /work filters) | `content/settings/categories.json` (read by `src/config/taxonomy.ts`) | CMS → Categories |
 | Homepage sections (title, order, blurb) | `content/settings/home.json` (read by `src/config/home.ts`) | CMS → Homepage |
-| Technology vocabulary (`tech` ids) | `TECH` in `src/config/taxonomy.ts` | code only |
+| Technology vocabulary (`tech` ids + tag colours) | `TECH` in `src/config/taxonomy.ts` | code only |
 | Source code, repo description, stars, activity | GitHub | — fetched at build time |
 | Demo / long-form video | YouTube | — click-to-load players, titles via oEmbed |
 
@@ -89,7 +89,13 @@ code with `<GitHubCode>` rather than copying it when the repo is public.
   ("Currently cooking" — work in progress, placed mid-page) · Math · Shaders. Each project picks ONE
   with `homeSection:` (omit = only on /work). Inside a section, `tier: featured` projects get
   full-width rows; everything else is a card; sections fold after 9 cards ("Show more"). A sticky
-  section bar (`components/home/section-nav.tsx`) highlights the section in view.
+  section bar (`components/home/section-nav.tsx`) highlights the section in view. Each section has a
+  tiny animated icon in the bar and its header (`components/home/section-icon.tsx`, keyed by section
+  id: cog · viewfinder with blinking REC · pulsing live dot · travelling sine · material ball) — a new
+  section id gets no icon until it's added there.
+- **Live dot** (`components/ui/live-dot.tsx`) = work in progress: the In the Lab section,
+  "Now building" in the hero, and every `status: active` project ("In development", via
+  `components/project/status.tsx`).
 - **Pieces** (`items:` in frontmatter) model collections — the studio productions, the shader set,
   the vector-math demos. Each piece becomes its own homepage card linking to
   `/work/<slug>#<piece-id>`, and the project page shows a "Pieces" grid (YouTube pieces open the full
@@ -121,7 +127,9 @@ code with `<GitHubCode>` rather than copying it when the repo is public.
    first person, concrete, no hype. **Never invent facts, numbers or contributions** — if something
    (role, team size, year) isn't known, leave the field out and tell Matin.
 3. Pick `tech` ids only from `src/config/taxonomy.ts`; categories only from `categories.json`
-   (`lab` = "In the Lab" — experiments and work in progress).
+   (`lab` = "In the Lab" — experiments and work in progress). A new technology needs a line in
+   `TECH` with a `color` (its brand colour if it has one; otherwise a hue distinct from the tags it
+   usually sits next to) — check it reads in both themes.
 4. Media: `npm run media -- <slug> <file-or-youtube-url> --name preview` for the card/hero loop
    (5–12 s), `--name cover` for a still, plain file args for gallery items. Writes to
    `public/media/<slug>/`. Every project with a video should get a local `preview` loop.
@@ -210,6 +218,9 @@ public/media/<slug>/        optimized media per project
   (one at a time). Full YouTube players (with sound) load only on click.
 - No new UI dependencies without a reason; animation is CSS (scroll-driven `.reveal`, transform-only
   `animate-rise` above the fold) and the native View Transitions API. Respect `prefers-reduced-motion`.
+  Small looping marks (section icons, theme-icon pop) live in the "Micro-animations" block of
+  `globals.css`; arrow/download icons carry `data-nudge` and lean toward where their link goes on
+  hover (override with e.g. `data-nudge="down"` on a rotated arrow).
 - Read copy from `site` (`src/config/site.ts`); never hardcode name, email or URLs in components.
 - `cn()` from `src/lib/utils.ts`; CTAs via `ButtonLink` (`src/components/ui/button.tsx`).
 
@@ -224,6 +235,10 @@ public/media/<slug>/        optimized media per project
   (View work, Résumé, Get in touch) up top; technical depth inside case studies.
 - Small radius on media and controls only (`rounded-lg` media, `rounded-md` buttons/chips), hairline
   borders, one accent used sparingly, no decorative gradients, no cards-inside-cards.
+- **Tech tags are colour-coded** (Matin's request — recognisable at a glance): each technology has one
+  colour everywhere (`TECH[id].color`; `dark` overrides it in the dark theme, e.g. Unreal turns
+  white). Render tech with `TechTags` / `TechDot` (`components/project/tech-tags.tsx`), never as
+  plain text or hand-picked colours. The `.tech-tag` CSS keeps text at AA in both themes.
 - Type: Archivo (variable width — `semi-wide`/`wide` for display) + JetBrains Mono for metadata
   (`label` utility). Fluid sizes: `text-display`, `text-title`, `text-heading`, `text-lead`.
 - Layout: `page gutter` on every section wrapper. Case-study prose: `.prose-case` in globals.css.

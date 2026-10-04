@@ -1,5 +1,6 @@
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import { LiveDot } from "./live-dot";
 
 /** Toggle chip used by the Work explorer and homepage category tabs. Disabled when it would show nothing. */
 export function Chip({
@@ -9,10 +10,15 @@ export function Chip({
   onClick,
   children,
   dot,
+  color,
+  darkColor,
 }: {
   pressed: boolean;
-  /** Small accent dot before the label (e.g. "In the Lab"). */
+  /** Pulsing live dot before the label (e.g. "In the Lab"). */
   dot?: boolean;
+  /** A technology's colour (TECH[id].color), shown as a dot before the label. */
+  color?: string;
+  darkColor?: string;
   count?: number;
   small?: boolean;
   onClick: () => void;
@@ -33,7 +39,14 @@ export function Chip({
           : "border-line-strong text-fg-muted hover:border-fg hover:text-fg disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:border-line-strong disabled:hover:text-fg-muted",
       )}
     >
-      {dot && <span aria-hidden className={cn("size-1.5 rounded-full", pressed ? "bg-ink" : "bg-accent")} />}
+      {dot && <LiveDot className={pressed ? undefined : "text-accent"} />}
+      {color && (
+        <span
+          aria-hidden
+          className="tech-dot"
+          style={{ "--tech": color, ...(darkColor && { "--tech-dark": darkColor }) } as CSSProperties}
+        />
+      )}
       {children}
       {count !== undefined && <span className={pressed ? "text-ink/60" : "text-fg-faint"}>{count}</span>}
     </button>

@@ -7,13 +7,14 @@ import type { HomeSection as Section } from "@/config/home";
 import { isCategoryId } from "@/config/taxonomy";
 import { compareProjects, toSummary, type Project } from "@/lib/content/projects";
 import { ExpandableGrid } from "./expandable-grid";
+import { hasSectionIcon, SectionIcon } from "./section-icon";
 
 /**
  * One homepage section (Developed Games & Tools, Virtual Production, In the
  * Lab, …). Featured projects get full-width rows; collections expand into one
  * card per piece; everything else is a card. Long sections fold after 9 cards.
  */
-export function HomeSection({ section, projects, live }: { section: Section; projects: Project[]; live?: boolean }) {
+export function HomeSection({ section, projects }: { section: Section; projects: Project[] }) {
   const sorted = [...projects].sort(compareProjects);
   const featured = sorted.filter((p) => p.tier === "featured" && p.items.length === 0);
   const cards = sorted
@@ -30,14 +31,9 @@ export function HomeSection({ section, projects, live }: { section: Section; pro
     <section id={section.id} aria-labelledby={`${section.id}-title`} className="page gutter scroll-mt-32 pt-16 md:pt-24">
       <header className="mb-10 grid gap-6 border-t border-line pt-6 md:mb-14 md:grid-cols-12">
         <div className="md:col-span-7">
-          {section.eyebrow && (
-            <p className="label mb-3 flex items-center gap-2.5 text-accent">
-              {live && (
-                <span aria-hidden className="relative flex size-2">
-                  <span className="absolute inline-flex size-full animate-ping rounded-full bg-accent opacity-60 motion-reduce:animate-none" />
-                  <span className="relative inline-flex size-2 rounded-full bg-accent" />
-                </span>
-              )}
+          {(section.eyebrow || hasSectionIcon(section.id)) && (
+            <p className="label mb-3 flex min-h-3.5 items-center gap-2.5 text-accent">
+              <SectionIcon id={section.id} />
               {section.eyebrow}
             </p>
           )}

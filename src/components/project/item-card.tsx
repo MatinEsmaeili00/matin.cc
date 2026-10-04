@@ -6,7 +6,7 @@ import { YouTubeHoverPreview } from "@/components/media/youtube-hover-preview";
 import { YouTubePlayer } from "@/components/media/youtube-player";
 import type { Project, ProjectItem } from "@/lib/content/projects";
 import { cn } from "@/lib/utils";
-import { techLabels } from "./format";
+import { TechTags } from "./tech-tags";
 
 /**
  * The visual for one piece: local loop over its poster, an image, a YouTube
@@ -41,7 +41,6 @@ export function ItemCard({
   item: ProjectItem;
   sizes?: string;
 }) {
-  const tech = techLabels(item.tech.length ? item.tech : project.tech, 3);
   return (
     <article className="group" data-preview-root>
       <Link href={`${project.url}#${item.id}`} className="block focus-visible:outline-offset-4">
@@ -50,7 +49,7 @@ export function ItemCard({
           {item.title}
         </h3>
         {item.summary && <p className="mt-2 line-clamp-2 text-[0.9375rem] leading-relaxed text-fg-muted">{item.summary}</p>}
-        <p className="label mt-3">{tech.join(" · ")}</p>
+        <TechTags tech={item.tech.length ? item.tech : project.tech} limit={3} className="mt-3" />
       </Link>
     </article>
   );
@@ -75,7 +74,7 @@ export function PieceGrid({ items }: { items: ProjectItem[] }) {
           )}
           <h3 className="mt-4 text-lg font-semibold tracking-tight">{item.title}</h3>
           {item.summary && <p className="mt-1.5 text-[0.9375rem] leading-relaxed text-fg-muted">{item.summary}</p>}
-          {item.tech.length > 0 && <p className="label mt-2">{techLabels(item.tech).join(" · ")}</p>}
+          <TechTags tech={item.tech} className="mt-3" />
         </li>
       ))}
     </ul>

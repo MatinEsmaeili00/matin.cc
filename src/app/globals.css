@@ -178,6 +178,115 @@
   }
 }
 
+/*
+ * Tech tags: every technology keeps one colour across the site (TECH[id].color
+ * in config/taxonomy.ts, set inline as --tech). Text mixes 45% of it into fg,
+ * which keeps every tag above 5:1 in both themes; the dark theme lightens the
+ * colour so near-black brands (Unreal) still read on the dark page.
+ */
+.tech-tag,
+.tech-dot {
+  --tech-c: var(--tech);
+}
+:root[data-theme="dark"] :is(.tech-tag, .tech-dot) {
+  --tech-c: var(--tech-dark, color-mix(in oklab, var(--tech), white 35%));
+}
+.tech-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.2rem 0.45rem;
+  border-radius: 4px;
+  background: color-mix(in oklab, var(--tech-c) 12%, transparent);
+  color: color-mix(in oklab, var(--tech-c) 45%, var(--color-fg));
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  line-height: var(--text-label--line-height);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.tech-tag[data-plain] {
+  padding-inline: 0;
+  background: none;
+}
+.tech-dot {
+  flex-shrink: 0;
+  width: 0.4375rem;
+  height: 0.4375rem;
+  border-radius: 9999px;
+  background: var(--tech-c);
+}
+
+/*
+ * Micro-animations: the small marks that make the page feel alive — section
+ * icons (components/home/section-icon.tsx), arrows that lean toward where a
+ * link goes, the theme icon. All of it stops under prefers-reduced-motion.
+ */
+.icon-material {
+  background:
+    radial-gradient(circle at 32% 30%, rgb(255 255 255 / 0.9) 0 10%, transparent 42%),
+    radial-gradient(circle at 32% 30%, transparent 35%, rgb(0 0 0 / 0.4) 100%),
+    currentColor;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .icon-spin {
+    animation: icon-spin 7s linear infinite;
+  }
+  .icon-orbit {
+    animation: icon-spin 3.2s linear infinite;
+  }
+  .icon-rec {
+    animation: icon-rec 1.6s ease-in-out infinite;
+  }
+  .icon-wave {
+    animation: icon-wave 1.4s linear infinite;
+  }
+  .icon-pop {
+    animation: icon-pop 0.5s var(--ease-out-expo);
+  }
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  [data-nudge] {
+    transition: translate 0.35s var(--ease-out-expo);
+  }
+  :is(a, button):hover [data-nudge="right"] {
+    translate: 3px 0;
+  }
+  :is(a, button):hover [data-nudge="left"] {
+    translate: -3px 0;
+  }
+  :is(a, button):hover [data-nudge="down"] {
+    translate: 0 2px;
+  }
+  :is(a, button):hover [data-nudge="up-right"] {
+    translate: 2px -2px;
+  }
+}
+@keyframes icon-spin {
+  to {
+    rotate: 360deg;
+  }
+}
+@keyframes icon-rec {
+  50% {
+    opacity: 0.15;
+  }
+}
+/* One period of the sine path in section-icon.tsx (16 units). */
+@keyframes icon-wave {
+  to {
+    translate: 16px 0;
+  }
+}
+@keyframes icon-pop {
+  from {
+    opacity: 0;
+    rotate: -90deg;
+    scale: 0.4;
+  }
+}
+
 /* Hide scrollbars on horizontally scrolling chip rows, keep them scrollable. */
 .no-scrollbar {
   scrollbar-width: none;
