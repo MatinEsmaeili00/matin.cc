@@ -66,6 +66,40 @@ export function Star(props: IconProps) {
   );
 }
 
+export function Sun(props: IconProps) {
+  return (
+    <svg viewBox="0 0 16 16" {...base} strokeWidth={1.4} {...props}>
+      <circle cx="8" cy="8" r="3" />
+      <path d="M8 1v1.5M8 13.5V15M1 8h1.5M13.5 8H15M3.05 3.05l1.06 1.06M11.89 11.89l1.06 1.06M3.05 12.95l1.06-1.06M11.89 4.11l1.06-1.06" />
+    </svg>
+  );
+}
+
+export function Moon(props: IconProps) {
+  return (
+    <svg viewBox="0 0 16 16" {...base} strokeWidth={1.4} {...props}>
+      <path d="M13.5 9.6A5.75 5.75 0 0 1 6.4 2.5a5.75 5.75 0 1 0 7.1 7.1Z" />
+    </svg>
+  );
+}
+
+export function Download(props: IconProps) {
+  return (
+    <svg viewBox="0 0 16 16" {...base} strokeWidth={1.4} {...props}>
+      <path d="M8 2v8M4.5 6.5 8 10l3.5-3.5M2.5 13.5h11" />
+    </svg>
+  );
+}
+
+export function Mail(props: IconProps) {
+  return (
+    <svg viewBox="0 0 16 16" {...base} strokeWidth={1.4} {...props}>
+      <rect x="2" y="3.5" width="12" height="9" rx="1" />
+      <path d="m2.5 4.5 5.5 4 5.5-4" />
+    </svg>
+  );
+}
+
 export function GitHubMark(props: IconProps) {
   return (
     <svg viewBox="0 0 16 16" aria-hidden fill="currentColor" {...props}>

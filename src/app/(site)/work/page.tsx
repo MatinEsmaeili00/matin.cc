@@ -51,7 +51,7 @@ export default async function WorkPage() {
 
       <ProjectExplorer
         items={items}
-        categories={usedCategories.map((c) => ({ id: c.id, label: c.label }))}
+        categories={usedCategories.map((c) => ({ id: c.id, label: c.label, dot: c.id === "lab" }))}
         primaryTech={usedTech.filter((id) => "primary" in TECH[id]).map(option)}
         moreTech={usedTech
           .filter((id) => !("primary" in TECH[id]))

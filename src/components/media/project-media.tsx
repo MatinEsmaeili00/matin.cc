@@ -32,7 +32,7 @@ export function ProjectMedia({
   className?: string;
 }) {
   return (
-    <div className={cn("relative w-full overflow-hidden bg-ink-2", aspect, className)}>
+    <div className={cn("relative w-full overflow-hidden rounded-lg bg-ink-2", aspect, className)}>
       {cover ? (
         <Image
           src={cover.src}

@@ -1,0 +1,38 @@
+{
+  "name": "Matin Esmaeili",
+  "shortName": "Matin",
+  "url": "https://matin.cc",
+  "roles": [
+    "Graphics / Rendering Engineer",
+    "Technical Artist",
+    "Real-Time Simulation Developer"
+  ],
+  "tagline": "I build real-time graphics, simulations and interactive 3D experiences — from GPU-driven snow and sand in Unreal Engine to VR digital twins used for training at LSU.",
+  "bio": "I'm a graphics programmer and technical artist working where rendering, simulation and interaction meet: GPU compute in Unreal Engine, VR/AR digital twins for training and industry, and engine-driven robotics.",
+  "description": "Portfolio of Matin Esmaeili — graphics programming, rendering engineering and technical art. Compute shaders, GPU simulation, XR digital twins, robotics and games in Unreal Engine, Unity and Godot.",
+  "openTo": "Open to graphics, rendering, technical art and real-time simulation roles and collaborations.",
+  "email": "matin.esmaeili98@gmail.com",
+  "showreelYoutube": "Co1fk8n9_bM",
+  "showreelTitle": "Portfolio reel",
+  "githubUsername": "MatinEsmaeili00",
+  "youtubeHandle": "@MatinEsmaeili_00",
+  "youtubeChannelId": "UCxh6EKi9_EWSRgClrSjmEiA",
+  "social": [
+    {
+      "label": "GitHub",
+      "href": "https://github.com/MatinEsmaeili00"
+    },
+    {
+      "label": "LinkedIn",
+      "href": "https://www.linkedin.com/in/matinesmaeili/"
+    },
+    {
+      "label": "YouTube",
+      "href": "https://www.youtube.com/@MatinEsmaeili_00"
+    },
+    {
+      "label": "itch.io",
+      "href": "https://m4tin.itch.io"
+    }
+  ]
+}

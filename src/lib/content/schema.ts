@@ -57,8 +57,12 @@ export const projectFrontmatterSchema = z
 
     /** Start year — drives sorting. */
     year: z.number().int().min(2000).max(2100),
-    /** End year, or "present" for ongoing work. Omit for single-year projects. */
-    yearEnd: z.union([z.number().int().min(2000).max(2100), z.literal("present")]).optional(),
+    /** End year, or "present" for ongoing work. Omit for single-year projects. (The CMS stores it as text.) */
+    yearEnd: z
+      .union([z.number().int(), z.literal("present"), z.string().regex(/^\d{4}$/, 'a 4-digit year or "present"')])
+      .transform((v) => (v === "present" ? v : Number(v)))
+      .pipe(z.union([z.literal("present"), z.number().int().min(2000).max(2100)]))
+      .optional(),
 
     /** shipped = finished/released · active = in progress · prototype · archived */
     status: z.enum(STATUSES).default("shipped"),

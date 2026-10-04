@@ -19,7 +19,7 @@ export function Showreel({ id, title, poster }: { id: string; title: string; pos
           onClick={() => setOpen(true)}
           className="group inline-flex min-h-11 items-center gap-3 font-mono text-[0.75rem] tracking-[0.12em] text-fg uppercase"
         >
-          <span className="flex size-9 items-center justify-center bg-fg text-ink transition-colors group-hover:bg-accent">
+          <span className="flex size-9 items-center justify-center rounded-full bg-fg text-ink transition-colors group-hover:bg-accent">
             <Play className="size-3.5 translate-x-px" />
           </span>
           Play reel

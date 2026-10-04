@@ -2,6 +2,7 @@
  * The controlled vocabulary for projects.
  *
  * `categories` are disciplines — the high-level "what kind of work is this".
+ * They live in content/settings/categories.json so they can be edited in the CMS.
  * `tech` is the registry of engines, languages and techniques.
  *
  * Project files reference these by id. Unknown ids fail validation (with a
@@ -10,56 +11,14 @@
  *
  * To add a new technology, add one line to TECH below.
  */
+import categoryData from "../../content/settings/categories.json";
 
-export const CATEGORIES = [
-  {
-    id: "rendering",
-    label: "Rendering & GPU",
-    blurb: "Compute shaders, render-graph passes, GPU simulation and visualization.",
-  },
-  {
-    id: "technical-art",
-    label: "Technical Art & Shaders",
-    blurb: "Shaders, VFX systems and artist-facing tools.",
-  },
-  {
-    id: "xr",
-    label: "XR & Digital Twins",
-    blurb: "VR/AR training, simulation and interactive replicas of real places and machines.",
-  },
-  {
-    id: "robotics",
-    label: "Robotics & AI",
-    blurb: "Robots driven from game engines, local LLMs, speech and computer vision.",
-  },
-  {
-    id: "games",
-    label: "Games",
-    blurb: "Shipped games, game jams and gameplay systems.",
-  },
-  {
-    id: "tools",
-    label: "Tools & Plugins",
-    blurb: "Reusable engine plugins and editor tooling.",
-  },
-  {
-    id: "math",
-    label: "Math & Algorithms",
-    blurb: "Vector maths, sampling, procedural generation and numerical methods.",
-  },
-  {
-    id: "virtual-production",
-    label: "Virtual Production",
-    blurb: "LED-wall content, motion capture and studio systems.",
-  },
-  {
-    id: "research",
-    label: "Research",
-    blurb: "Early-stage research prototypes and coursework.",
-  },
-] as const;
+export type Category = { id: string; label: string; blurb: string };
 
-export type CategoryId = (typeof CATEGORIES)[number]["id"];
+/** Disciplines, in display order. Edited in the CMS (Categories) or content/settings/categories.json. */
+export const CATEGORIES: readonly Category[] = categoryData.categories;
+
+export type CategoryId = string;
 
 type TechGroup = "engine" | "language" | "graphics" | "platform" | "ai" | "production";
 
@@ -127,13 +86,14 @@ export const TECH = {
 
 export type TechId = keyof typeof TECH;
 
-export const CATEGORY_IDS = CATEGORIES.map((c) => c.id) as [CategoryId, ...CategoryId[]];
+export const CATEGORY_IDS = CATEGORIES.map((c) => c.id) as [string, ...string[]];
 export const TECH_IDS = Object.keys(TECH) as [TechId, ...TechId[]];
 
-const categoryById = new Map<string, (typeof CATEGORIES)[number]>(CATEGORIES.map((c) => [c.id, c]));
+const categoryById = new Map<string, Category>(CATEGORIES.map((c) => [c.id, c]));
 
-export function getCategory(id: CategoryId) {
-  return categoryById.get(id)!;
+/** Unknown ids (e.g. a category deleted in the CMS) fall back to a readable label. */
+export function getCategory(id: CategoryId): Category {
+  return categoryById.get(id) ?? { id, label: id, blurb: "" };
 }
 
 export function techLabel(id: TechId): string {

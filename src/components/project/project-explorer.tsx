@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { flushSync } from "react-dom";
-import { cn } from "@/lib/utils";
+import { Chip } from "@/components/ui/chip";
 
 export type ExplorerItem = {
   slug: string;
@@ -15,7 +15,7 @@ export type ExplorerItem = {
   node: ReactNode;
 };
 
-type Option = { id: string; label: string };
+type Option = { id: string; label: string; dot?: boolean };
 
 type Filters = { category: string | null; tech: string[]; q: string };
 
@@ -95,6 +95,7 @@ export function ProjectExplorer({
               <Chip
                 key={c.id}
                 pressed={filters.category === c.id}
+                dot={c.dot}
                 count={countFor({ category: c.id })}
                 onClick={() => update({ ...filters, category: filters.category === c.id ? null : c.id })}
               >
@@ -139,7 +140,7 @@ export function ProjectExplorer({
                   window.history.replaceState(null, "", search ? `?${search}` : window.location.pathname);
                 }}
                 placeholder="Search — e.g. compute, VR, Niagara"
-                className="h-10 w-full border border-line-strong bg-transparent px-3 font-mono text-[0.8125rem] text-fg placeholder:text-fg-faint focus:border-fg focus:outline-none"
+                className="h-10 w-full rounded-md border border-line-strong bg-transparent px-3 font-mono text-[0.8125rem] text-fg placeholder:text-fg-faint focus:border-fg focus:outline-none"
               />
             </label>
           </div>
@@ -202,40 +203,6 @@ export function ProjectExplorer({
         )}
       </div>
     </>
-  );
-}
-
-function Chip({
-  pressed,
-  count,
-  small,
-  onClick,
-  children,
-}: {
-  pressed: boolean;
-  count?: number;
-  small?: boolean;
-  onClick: () => void;
-  children: ReactNode;
-}) {
-  const disabled = !pressed && count === 0;
-  return (
-    <button
-      type="button"
-      aria-pressed={pressed}
-      disabled={disabled}
-      onClick={onClick}
-      className={cn(
-        "flex shrink-0 items-center gap-2 border px-3 font-mono tracking-[0.06em] whitespace-nowrap uppercase transition-colors",
-        small ? "h-9 text-[0.6875rem]" : "h-10 text-[0.75rem]",
-        pressed
-          ? "border-fg bg-fg text-ink"
-          : "border-line-strong text-fg-muted hover:border-fg hover:text-fg disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:border-line-strong disabled:hover:text-fg-muted",
-      )}
-    >
-      {children}
-      {count !== undefined && <span className={pressed ? "text-ink/60" : "text-fg-faint"}>{count}</span>}
-    </button>
   );
 }
 

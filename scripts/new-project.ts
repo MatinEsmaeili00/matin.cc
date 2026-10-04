@@ -3,7 +3,8 @@
  *
  * Creates content/projects/<slug>.mdx, pre-filled from GitHub and YouTube
  * where possible. Interactive when run in a terminal; fully scriptable with
- * flags (which is how Claude Code should call it):
+ * flags (which is how Claude Code should call it). You can also add projects
+ * in the CMS: npm run dev → /keystatic.
  *
  *   npm run new-project -- --title "Snow Deformation" \
  *     --github MatinEsmaeili00/SnowDeformation --youtube https://youtu.be/XXXXXXXXXXX \
@@ -163,9 +164,6 @@ async function main() {
     "",
     hasSummary ? summary : "TODO — what it is and why it exists.",
     "",
-    "{/* Suggested sections: The problem · What I built · Technical breakdown · Challenges · Results.",
-    ...(github ? [`    Show code straight from the repo: <GitHubCode path="Source/File.cpp" lines="10-40" highlight="20-25" />`] : []),
-    `    Inline media: <Video id="..." />, <Clip src="/media/${slug}/clip.mp4" />, <Figure src="..." alt="..." /> */}`,
   ];
 
   fs.mkdirSync(PROJECTS_DIR, { recursive: true });

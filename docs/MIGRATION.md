@@ -109,8 +109,10 @@ in `src/config/redirects.ts`.
    Visualization and Robot Voice Control have no video yet, so they use the procedural ridgeline
    cover. A 6–10 s capture each (`npm run media -- <slug> <capture> --name preview`) plus a
    YouTube demo would make the homepage far stronger — Snow and Sand are the top two featured rows.
-2. **Résumé PDF** — put it at `public/resume.pdf`; the Résumé links appear automatically.
-3. **About page** (`content/about.mdx`) — written only from what the old site and GitHub support.
+2. **Résumé PDF** — upload it in the CMS (Site settings → Résumé) or drop it in as `public/resume.pdf`;
+   the "Download résumé" buttons appear automatically. A portrait photo (Site settings → Photo) also
+   helps recruiters.
+3. **About page** (CMS → About page) — written only from what the old site and GitHub support.
    Please add education/degree, current position, and anything else you want stated. The "graduate"
    and "PhD AI coursework" context comes from the Verocity plugin README and the Monte Carlo repo.
 4. **Roles I couldn't confirm** (fields left blank or phrased cautiously):
@@ -135,14 +137,16 @@ in `src/config/redirects.ts`.
 
 ## 6. Cutover checklist
 
-1. Create the GitHub repository and push this project to `main`.
-2. Vercel → New Project → import the repo (framework auto-detected). Add `GITHUB_TOKEN`
-   (and optionally `YOUTUBE_API_KEY`) under Environment Variables.
-3. Check the `*.vercel.app` preview: every page, the old-URL redirects, OG images.
-4. Vercel → Domains → add `matin.cc` and `www.matin.cc`; update DNS at the registrar as Vercel
-   instructs (apex `A 76.76.21.21`, `www` CNAME `cname.vercel-dns.com`).
+1. ✅ GitHub repository created: `MatinEsmaeili00/matin.cc` (private).
+2. On your host: create a **Node.js app** (Node 20.9+) from the GitHub repo, with build command
+   `npm run build` and start command `npm start`. Add `GITHUB_TOKEN` (and optionally
+   `YOUTUBE_API_KEY`) as environment variables. If the host can only serve static files, the
+   site needs a static-export variant — ask Claude to set it up (see CLAUDE.md → Deployment).
+3. Check the host's preview URL: every page, the old-URL redirects, OG images.
+4. Point `matin.cc` (and `www`) at the new host in DNS, following the host's instructions.
 5. Keep a full WordPress backup (Hostinger → Backups, or export + uploads folder) before
-   cancelling hosting.
+   switching DNS or cancelling hosting.
 6. Google Search Console: verify the domain, submit `https://matin.cc/sitemap.xml`.
-7. Create a Vercel Deploy Hook and add it as the `VERCEL_DEPLOY_HOOK` GitHub secret to enable
-   the daily rebuild (`.github/workflows/scheduled-rebuild.yml`).
+7. Optional — rebuild button: if your host offers a deploy/build hook URL, put it in `.env.local`
+   as `DEPLOY_HOOK_URL` (for the /admin button) and as the `DEPLOY_HOOK_URL` GitHub secret (for
+   GitHub → Actions → "Rebuild site"). Rebuilds only happen when you ask — there's no schedule.

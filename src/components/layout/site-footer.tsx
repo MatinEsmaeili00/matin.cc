@@ -18,9 +18,7 @@ export function SiteFooter() {
           >
             {site.email}
           </a>
-          <p className="mt-6 max-w-md text-fg-muted">
-            Open to graphics, rendering, technical art and real-time simulation roles and collaborations.
-          </p>
+          {site.openTo && <p className="mt-6 max-w-md text-fg-muted">{site.openTo}</p>}
         </div>
 
         <nav aria-label="Elsewhere" className="md:col-span-4 md:col-start-9">

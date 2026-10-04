@@ -23,7 +23,7 @@ export function EmbedFacade({
 
   return (
     <figure className="not-prose my-10">
-      <div className="relative w-full overflow-hidden border border-line bg-ink-2" style={{ aspectRatio: aspect }}>
+      <div className="relative w-full overflow-hidden rounded-lg border border-line bg-ink-2" style={{ aspectRatio: aspect }}>
         {active ? (
           <iframe
             src={src}
@@ -38,7 +38,7 @@ export function EmbedFacade({
             onClick={() => setActive(true)}
             className="group absolute inset-0 flex size-full flex-col items-center justify-center gap-4 text-center"
           >
-            <span className="flex size-14 items-center justify-center bg-fg text-ink transition-colors group-hover:bg-accent">
+            <span className="flex size-14 items-center justify-center rounded-full bg-fg text-ink transition-colors group-hover:bg-accent">
               <Play className="size-5 translate-x-px" />
             </span>
             <span className="font-mono text-[0.75rem] tracking-[0.06em] text-fg uppercase">Load interactive viewer</span>

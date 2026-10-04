@@ -2,6 +2,7 @@ import Link from "next/link";
 import { site } from "@/config/site";
 import { navItems } from "@/lib/site-links";
 import { MobileNav } from "./mobile-nav";
+import { ThemeToggle } from "./theme-toggle";
 
 export function SiteHeader() {
   const items = navItems();
@@ -16,17 +17,19 @@ export function SiteHeader() {
           {site.name}
         </Link>
 
-        <nav aria-label="Primary" className="hidden sm:block">
-          <ul className="flex items-center gap-8">
-            {items.map((item) => (
-              <li key={item.href}>
-                <NavLink {...item} />
-              </li>
-            ))}
-          </ul>
-        </nav>
-
-        <MobileNav items={items} />
+        <div className="flex items-center gap-2 sm:gap-6">
+          <nav aria-label="Primary" className="hidden sm:block">
+            <ul className="flex items-center gap-8">
+              {items.map((item) => (
+                <li key={item.href}>
+                  <NavLink {...item} />
+                </li>
+              ))}
+            </ul>
+          </nav>
+          <ThemeToggle />
+          <MobileNav items={items} />
+        </div>
       </div>
     </header>
   );

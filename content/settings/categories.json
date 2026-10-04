@@ -1,0 +1,59 @@
+{
+  "categories": [
+    {
+      "id": "rendering",
+      "label": "Rendering & GPU",
+      "blurb": "Compute shaders, render-graph passes, GPU simulation and visualization."
+    },
+    {
+      "id": "xr",
+      "label": "XR & Digital Twins",
+      "blurb": "VR/AR training, simulation and interactive replicas of real places and machines."
+    },
+    {
+      "id": "games",
+      "label": "Games",
+      "blurb": "Shipped games, game jams and gameplay systems."
+    },
+    {
+      "id": "tools",
+      "label": "Tools & Plugins",
+      "blurb": "Reusable engine plugins and editor tooling."
+    },
+    {
+      "id": "shaders",
+      "label": "Shaders",
+      "blurb": "Hand-written shaders — HLSL, ShaderLab and compute."
+    },
+    {
+      "id": "math",
+      "label": "Math",
+      "blurb": "Vector maths, sampling, procedural generation and numerical methods."
+    },
+    {
+      "id": "virtual-production",
+      "label": "Virtual Production",
+      "blurb": "LED-wall content, motion capture and studio systems."
+    },
+    {
+      "id": "robotics",
+      "label": "Robotics & AI",
+      "blurb": "Robots driven from game engines, local LLMs, speech and computer vision."
+    },
+    {
+      "id": "technical-art",
+      "label": "Technical Art",
+      "blurb": "VFX systems and artist-facing tools."
+    },
+    {
+      "id": "research",
+      "label": "Research",
+      "blurb": "Research prototypes and coursework."
+    },
+    {
+      "id": "lab",
+      "label": "In the Lab",
+      "blurb": "Experiments and work in progress — things I'm building and figuring out right now."
+    }
+  ]
+}

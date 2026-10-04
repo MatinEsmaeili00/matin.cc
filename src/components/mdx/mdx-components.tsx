@@ -116,7 +116,7 @@ function Clip({ src, caption, alt }: { src: string; caption?: string; alt?: stri
   };
   return (
     <figure className="not-prose my-10">
-      <div className="relative aspect-video overflow-hidden bg-ink-2" role="img" aria-label={alt ?? caption ?? ""}>
+      <div className="relative aspect-video overflow-hidden rounded-lg bg-ink-3" role="img" aria-label={alt ?? caption ?? ""}>
         {video.poster && <Image src={video.poster} alt="" fill sizes="(min-width: 1024px) 800px, 100vw" className="object-cover" />}
         <PreviewVideo video={video} mode="inview" />
       </div>
@@ -135,7 +135,7 @@ async function Figure({ src, alt, caption, className }: { src: string; alt: stri
         width={size.width}
         height={size.height}
         sizes="(min-width: 1024px) 800px, 100vw"
-        className="h-auto w-full bg-ink-2"
+        className="h-auto w-full rounded-lg bg-ink-2"
       />
       {caption && <Caption>{caption}</Caption>}
     </figure>
@@ -149,7 +149,7 @@ function MarkdownImage({ src, alt = "", title }: ComponentPropsWithoutRef<"img">
 
 function Callout({ title, children }: { title?: string; children: ReactNode }) {
   return (
-    <aside className="my-10 border-l border-accent bg-ink-2 px-5 py-4 sm:px-6 sm:py-5">
+    <aside className="my-10 rounded-r-lg border-l-2 border-accent bg-ink-2 px-5 py-4 sm:px-6 sm:py-5">
       {title && <p className="label mb-2 text-accent">{title}</p>}
       <div className="space-y-3 text-fg-muted [&_strong]:text-fg">{children}</div>
     </aside>

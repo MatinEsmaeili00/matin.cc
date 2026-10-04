@@ -1,7 +1,5 @@
 import type { Metadata, Viewport } from "next";
 import { Archivo, JetBrains_Mono } from "next/font/google";
-import { SiteFooter } from "@/components/layout/site-footer";
-import { SiteHeader } from "@/components/layout/site-header";
 import { site } from "@/config/site";
 import "./globals.css";
 
@@ -43,26 +41,23 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#08080a",
-  colorScheme: "dark",
+  themeColor: "#f6f4ef",
 };
 
+/**
+ * Applies the saved theme before first paint (no light→dark flash).
+ * Light is the default; the toggle in the header stores "dark" or "light".
+ */
+const themeScript = `try{if(localStorage.getItem("theme")==="dark")document.documentElement.setAttribute("data-theme","dark")}catch(e){}`;
+
+/** Root shell shared by the public site and the CMS. Site chrome lives in (site)/layout.tsx. */
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${archivo.variable} ${jetbrains.variable} antialiased`}>
-      <body className="flex min-h-dvh flex-col">
-        <a
-          href="#main"
-          className="sr-only z-[60] bg-accent px-4 py-2 font-mono text-sm text-ink focus:not-sr-only focus:fixed focus:top-2 focus:left-2"
-        >
-          Skip to content
-        </a>
-        <SiteHeader />
-        <main id="main" className="flex-1 pt-14">
-          {children}
-        </main>
-        <SiteFooter />
-      </body>
+    <html lang="en" className={`${archivo.variable} ${jetbrains.variable} antialiased`} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
+      <body className="flex min-h-dvh flex-col">{children}</body>
     </html>
   );
 }

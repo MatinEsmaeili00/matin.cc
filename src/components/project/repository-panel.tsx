@@ -30,7 +30,7 @@ export async function RepositoryPanel({ repo }: { repo: string }) {
   const url = data?.url ?? githubRepoUrl(repo);
 
   return (
-    <div className="border border-line bg-ink-2">
+    <div className="overflow-hidden rounded-lg border border-line bg-ink-2">
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-line px-5 py-4">
         <a href={url} target="_blank" rel="noopener" className="flex min-w-0 items-center gap-3 hover:text-accent">
           <GitHubMark className="size-4 shrink-0" />

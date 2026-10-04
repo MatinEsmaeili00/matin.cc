@@ -1,20 +1,22 @@
 @import "tailwindcss";
 
 /*
- * Design tokens. Dark, warm-neutral, one accent.
- * Corners are square on purpose — don't add rounded-* utilities.
+ * Design tokens. Warm paper by default (friendly for everyone, first), with a
+ * dark theme behind the header toggle. "ink" = page background, "fg" = text —
+ * the names hold in both themes. Every pair below meets WCAG AA.
+ * Corners: small radius on media and controls only (rounded-md / rounded-lg).
  */
 @theme {
-  --color-ink: #08080a;
-  --color-ink-2: #0e0e11;
-  --color-ink-3: #16161a;
-  --color-line: rgb(236 233 226 / 0.09);
-  --color-line-strong: rgb(236 233 226 / 0.2);
-  --color-fg: #ece9e2;
-  --color-fg-muted: #a09d95;
-  --color-fg-faint: #8b8881; /* ≥ 4.5:1 on ink for small labels */
-  --color-accent: #ffa463;
-  --color-accent-dim: rgb(255 164 99 / 0.14);
+  --color-ink: #f6f4ef;
+  --color-ink-2: #ffffff;
+  --color-ink-3: #ebe7df;
+  --color-line: rgb(23 22 27 / 0.1);
+  --color-line-strong: rgb(23 22 27 / 0.22);
+  --color-fg: #17161b;
+  --color-fg-muted: #4d4a45;
+  --color-fg-faint: #6b6760;
+  --color-accent: #b4470c;
+  --color-accent-dim: rgb(180 71 12 / 0.1);
 
   --font-sans: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-jetbrains), ui-monospace, "SFMono-Regular", Menlo, monospace;
@@ -35,6 +37,25 @@
 
   /* Hero entrance: transform only. Fading from opacity 0 would delay Largest Contentful Paint. */
   --animate-rise: rise 0.9s var(--ease-out-expo) both;
+}
+
+/*
+ * Dark palette: the whole site when the toggle is on, and always for
+ * .scope-dark islands (code blocks, overlays on video).
+ */
+:root[data-theme="dark"],
+.scope-dark {
+  --color-ink: #08080a;
+  --color-ink-2: #0e0e11;
+  --color-ink-3: #16161a;
+  --color-line: rgb(236 233 226 / 0.09);
+  --color-line-strong: rgb(236 233 226 / 0.2);
+  --color-fg: #ece9e2;
+  --color-fg-muted: #a09d95;
+  --color-fg-faint: #8b8881;
+  --color-accent: #ffa463;
+  --color-accent-dim: rgb(255 164 99 / 0.14);
+  color-scheme: dark;
 }
 
 @keyframes reveal {
@@ -89,7 +110,7 @@
 
 @layer base {
   html {
-    color-scheme: dark;
+    color-scheme: light;
     background: var(--color-ink);
     -webkit-text-size-adjust: 100%;
     text-rendering: optimizeLegibility;

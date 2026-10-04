@@ -1,62 +1,81 @@
 /**
  * Identity, contact links and homepage copy.
  *
- * Every component reads from here — never hardcode a name, URL or email in a
- * component. Edit this file to change what the whole site says about you.
+ * The values live in content/settings/site.json — edit them in the CMS
+ * (/keystatic → Site settings) or by hand. This file only gives them a typed
+ * shape and derives URLs, so components never hardcode a name, URL or email.
  */
-export const site = {
-  name: "Matin Esmaeili",
-  shortName: "Matin",
-  url: "https://matin.cc",
-  locale: "en_US",
+import raw from "../../content/settings/site.json";
 
-  /** Shown under the name on the homepage, in order. */
-  roles: [
-    "Graphics / Rendering Engineer",
-    "Technical Artist",
-    "Real-Time Simulation Developer",
-  ],
+/** Shape of site.json. Blank fields may be missing or null when saved from the CMS. */
+type SiteSettings = {
+  name: string;
+  shortName?: string | null;
+  url: string;
+  roles?: string[];
+  tagline?: string | null;
+  bio?: string | null;
+  description?: string | null;
+  openTo?: string | null;
+  location?: string | null;
+  email: string;
+  resume?: string | null;
+  photo?: string | null;
+  showreelYoutube?: string | null;
+  showreelTitle?: string | null;
+  githubUsername: string;
+  youtubeHandle?: string | null;
+  youtubeChannelId?: string | null;
+  social?: { label: string; href: string }[];
+};
 
-  /** One or two sentences. Homepage hero + default meta description. */
-  tagline:
-    "I build GPU simulation, rendering tools and real-time digital twins in Unreal Engine, Unity and Godot — compute shaders, XR, and the maths that holds them together.",
+const data = raw as SiteSettings;
 
-  /** Homepage "About" strip. The full story lives in content/about.mdx. */
-  bio: "I'm a graphics programmer and technical artist working where rendering, simulation and interaction meet: GPU compute in Unreal Engine, VR/AR digital twins for training and industry, and engine-driven robotics.",
+const optional = (value: string | undefined | null) => (value && value.trim() ? value.trim() : null);
 
-  /** Used for <meta name="description"> where a page has nothing better. */
-  description:
-    "Portfolio of Matin Esmaeili — graphics programming, rendering engineering and technical art. Compute shaders, GPU simulation, XR digital twins, robotics and games in Unreal Engine, Unity and Godot.",
+function build(settings: SiteSettings) {
+  return {
+    name: settings.name,
+    shortName: settings.shortName || settings.name.split(" ")[0],
+    url: settings.url.replace(/\/+$/, ""),
+    locale: "en_US",
 
-  email: "matin.esmaeili98@gmail.com",
+    /** Shown under the name on the homepage, in order. */
+    roles: settings.roles ?? [],
+    /** One or two plain-language sentences for the homepage hero. */
+    tagline: settings.tagline ?? "",
+    /** Homepage "About" strip. The full story lives in content/about.mdx. */
+    bio: settings.bio ?? "",
+    /** Default meta description. */
+    description: settings.description ?? settings.tagline ?? "",
+    /** "Open to …" line near contact links. */
+    openTo: optional(settings.openTo),
+    location: optional(settings.location),
+    email: settings.email,
 
-  /**
-   * Résumé PDF in /public. Set to null to hide every résumé link.
-   * The link is also hidden automatically if the file doesn't exist.
-   */
-  resume: "/resume.pdf" as string | null,
+    /** Résumé PDF in /public (uploaded in the CMS, or dropped in as public/resume.pdf). Links hide if the file is missing. */
+    resume: optional(settings.resume) ?? "/resume.pdf",
+    /** Optional portrait in /public, shown in the hero and on About. */
+    photo: optional(settings.photo),
 
-  github: {
-    username: "MatinEsmaeili00",
-    url: "https://github.com/MatinEsmaeili00",
-  },
+    showreel: optional(settings.showreelYoutube)
+      ? { youtube: settings.showreelYoutube!.trim(), title: settings.showreelTitle || "Portfolio reel" }
+      : null,
 
-  /** Optional reel shown from the homepage hero (click-to-play). null hides it. */
-  showreel: { youtube: "Co1fk8n9_bM", title: "Portfolio reel" } as { youtube: string; title: string } | null,
+    github: {
+      username: settings.githubUsername,
+      url: `https://github.com/${settings.githubUsername}`,
+    },
+    youtube: {
+      handle: settings.youtubeHandle ?? "",
+      url: settings.youtubeHandle ? `https://www.youtube.com/${settings.youtubeHandle}` : "",
+      channelId: settings.youtubeChannelId ?? "",
+    },
 
-  youtube: {
-    handle: "@MatinEsmaeili_00",
-    url: "https://www.youtube.com/@MatinEsmaeili_00",
-    channelId: "UCxh6EKi9_EWSRgClrSjmEiA",
-  },
+    /** Professional links, in display order. */
+    social: (settings.social ?? []).filter((s) => s.label && s.href),
+  };
+}
 
-  /** Professional links, rendered in this order in the footer and About page. */
-  social: [
-    { label: "GitHub", href: "https://github.com/MatinEsmaeili00" },
-    { label: "LinkedIn", href: "https://www.linkedin.com/in/matinesmaeili/" },
-    { label: "YouTube", href: "https://www.youtube.com/@MatinEsmaeili_00" },
-    { label: "itch.io", href: "https://m4tin.itch.io" },
-  ],
-} as const;
-
-export type Site = typeof site;
+export const site = build(data);
+export type Site = ReturnType<typeof build>;

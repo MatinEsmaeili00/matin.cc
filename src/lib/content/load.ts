@@ -59,7 +59,7 @@ export function loadProjects({ includeDrafts = false } = {}): LoadResult {
       continue;
     }
 
-    const result = projectFrontmatterSchema.safeParse(parsed.data);
+    const result = projectFrontmatterSchema.safeParse(clean(parsed.data));
     if (!result.success) {
       errors.push(formatIssues(file, result.error));
       continue;
@@ -71,6 +71,26 @@ export function loadProjects({ includeDrafts = false } = {}): LoadResult {
 
   errors.push(...crossFileErrors(projects));
   return { projects, errors };
+}
+
+/**
+ * Normalizes blank values before validation: the CMS writes empty text fields
+ * as "" and cleared fields as null, which mean "not set" here.
+ */
+export function clean(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value.map(clean).filter((v) => v !== undefined);
+  }
+  if (value && typeof value === "object" && !(value instanceof Date)) {
+    const out: Record<string, unknown> = {};
+    for (const [key, v] of Object.entries(value)) {
+      const c = clean(v);
+      if (c !== undefined) out[key] = c;
+    }
+    return out;
+  }
+  if (value === null || (typeof value === "string" && value.trim() === "")) return undefined;
+  return value;
 }
 
 /** Problems that only show up when looking at all projects together. */

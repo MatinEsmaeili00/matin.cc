@@ -17,7 +17,7 @@ export function ProceduralCover({
   const { paths, accentIndex } = ridgelines(seed);
 
   return (
-    <div className={cn("absolute inset-0 bg-ink-2", className)}>
+    <div className={cn("absolute inset-0 bg-ink-2 ring-1 ring-line ring-inset", className)}>
       <svg
         viewBox={`0 0 ${W} ${H}`}
         preserveAspectRatio="xMidYMid slice"

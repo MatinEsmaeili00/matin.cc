@@ -17,10 +17,10 @@ export function Gallery({ items }: { items: GalleryItem[] }) {
                 width={item.width}
                 height={item.height}
                 sizes="(min-width: 768px) 50vw, 100vw"
-                className="h-auto w-full bg-ink-2"
+                className="h-auto w-full rounded-lg bg-ink-2"
               />
             ) : (
-              <div className="relative aspect-video overflow-hidden bg-ink-2" role="img" aria-label={item.alt}>
+              <div className="relative aspect-video overflow-hidden rounded-lg bg-ink-3" role="img" aria-label={item.alt}>
                 {item.poster && (
                   <Image src={item.poster} alt="" fill sizes="(min-width: 768px) 50vw, 100vw" className="object-cover" />
                 )}

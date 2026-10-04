@@ -41,7 +41,7 @@ export function YouTubePlayer({
   const [warmed, setWarmed] = useState(false);
 
   return (
-    <div className={cn("relative aspect-video w-full overflow-hidden bg-ink-2", className)}>
+    <div className={cn("relative aspect-video w-full overflow-hidden rounded-lg bg-ink-3", className)}>
       {/* Warm up connections on intent so the player starts faster. */}
       {warmed && (
         <>
@@ -81,10 +81,10 @@ export function YouTubePlayer({
           {preview && <PreviewVideo video={preview} mode="inview" />}
           <span
             aria-hidden
-            className="absolute inset-0 bg-gradient-to-t from-ink/70 via-transparent to-transparent opacity-80 transition-opacity group-hover:opacity-100"
+            className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-80 transition-opacity group-hover:opacity-100"
           />
-          <span className="absolute bottom-0 left-0 flex items-center gap-3 p-4 sm:p-6">
-            <span className="flex size-12 items-center justify-center bg-fg text-ink transition-colors group-hover:bg-accent sm:size-14">
+          <span className="scope-dark absolute bottom-0 left-0 flex items-center gap-3 p-4 sm:p-6">
+            <span className="flex size-12 items-center justify-center rounded-full bg-fg text-ink transition-colors group-hover:bg-accent sm:size-14">
               <Play className="size-4 translate-x-px sm:size-5" />
             </span>
             <span className="hidden max-w-[40ch] font-mono text-[0.75rem] leading-snug tracking-[0.06em] text-fg uppercase sm:block">

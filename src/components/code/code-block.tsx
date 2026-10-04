@@ -40,7 +40,7 @@ export async function CodeBlock({
   });
 
   return (
-    <figure className="not-prose my-8 border border-line bg-ink-2">
+    <figure className="not-prose scope-dark my-8 overflow-hidden rounded-lg border border-line bg-ink-2 text-fg">
       <figcaption className="flex min-h-11 items-center justify-between gap-4 border-b border-line pl-4">
         <span className="flex min-w-0 items-baseline gap-3">
           <span className="label shrink-0 text-accent">{languageLabel(language)}</span>

@@ -26,8 +26,8 @@ export function ProjectLinks({ project }: { project: Project }) {
             rel="noopener"
             className={
               i === 0
-                ? "inline-flex min-h-11 items-center gap-2.5 bg-fg px-4 font-mono text-[0.75rem] tracking-[0.08em] text-ink uppercase transition-colors hover:bg-accent"
-                : "inline-flex min-h-11 items-center gap-2.5 border border-line-strong px-4 font-mono text-[0.75rem] tracking-[0.08em] text-fg uppercase transition-colors hover:border-fg"
+                ? "inline-flex min-h-11 items-center gap-2.5 rounded-md bg-fg px-4 font-mono text-[0.75rem] tracking-[0.08em] text-ink uppercase transition-colors hover:bg-accent"
+                : "inline-flex min-h-11 items-center gap-2.5 rounded-md border border-line-strong px-4 font-mono text-[0.75rem] tracking-[0.08em] text-fg uppercase transition-colors hover:border-fg"
             }
           >
             {link.github && <GitHubMark className="size-3.5" />}
