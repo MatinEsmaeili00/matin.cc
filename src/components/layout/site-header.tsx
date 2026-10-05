@@ -8,7 +8,8 @@ export function SiteHeader() {
   const items = navItems();
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 border-b border-line bg-ink/75 backdrop-blur-md supports-[backdrop-filter]:bg-ink/55">
+    // Its own view-transition layer: stays put and above page morphs (globals.css, "Page transitions").
+    <header className="site-header fixed inset-x-0 top-0 z-50 border-b border-line bg-ink/75 backdrop-blur-md supports-[backdrop-filter]:bg-ink/55">
       <div className="page gutter flex h-14 items-center justify-between">
         <Link
           href="/"

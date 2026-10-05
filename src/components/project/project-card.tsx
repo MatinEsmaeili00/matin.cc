@@ -1,13 +1,14 @@
 import Link from "next/link";
 import { ProjectMedia } from "@/components/media/project-media";
-import { Morph, morphName, openProject } from "@/components/ui/morph";
+import { Morph, morphName, openByMedia, openByTitle, videoHref, VT } from "@/components/ui/morph";
 import type { ProjectSummary } from "@/lib/content/projects";
 import { categoryLabels } from "./format";
 import { TechTags } from "./tech-tags";
 
 /**
- * Grid card: the visual leads, text stays to one glance. Opening it morphs the
- * media and title into the project page; the tech tags are their own links.
+ * Grid card: the visual leads, text stays to one glance. Two ways in: the
+ * media zooms into the project's video, the name glides into its title.
+ * The tech tags are their own links.
  */
 export function ProjectCard({
   project,
@@ -18,8 +19,9 @@ export function ProjectCard({
 }) {
   return (
     <article className="group" data-preview-root>
-      <Link href={project.url} {...openProject} className="block focus-visible:outline-offset-4">
-        <Morph name={morphName.media(project.slug)}>
+      {/* Pointer shortcut; keyboard and screen-reader users get the name link below. */}
+      <Link href={videoHref(project.url)} {...openByMedia} tabIndex={-1} aria-hidden className="block">
+        <Morph name={morphName.media(project.slug)} on={[VT.media, VT.browse]}>
           <ProjectMedia
             slug={project.slug}
             cover={project.cover}
@@ -29,8 +31,10 @@ export function ProjectCard({
             sizes={sizes}
           />
         </Morph>
-        <div className="mt-4 flex items-baseline justify-between gap-4">
-          <Morph name={morphName.title(project.slug)} kind="text">
+      </Link>
+      <Link href={project.url} {...openByTitle} className="mt-4 block focus-visible:outline-offset-4">
+        <div className="flex items-baseline justify-between gap-4">
+          <Morph name={morphName.title(project.slug)} kind="text" on={[VT.title, VT.browse]}>
             <h3 className="text-xl leading-tight font-semibold tracking-tight transition-colors group-hover:text-accent">
               {project.title}
             </h3>

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Morph, morphName, openProject } from "@/components/ui/morph";
+import { Morph, morphName, openByTitle, VT } from "@/components/ui/morph";
 import type { ProjectSummary } from "@/lib/content/projects";
 import { TechTags } from "./tech-tags";
 
@@ -26,10 +26,10 @@ export function ArchiveRow({ project }: { project: ProjectSummary }) {
       <span className="min-w-0">
         <Link
           href={project.url}
-          {...openProject}
+          {...openByTitle}
           className="font-semibold tracking-tight transition-colors group-hover:text-accent after:absolute after:inset-0"
         >
-          <Morph name={morphName.title(project.slug)} kind="text">
+          <Morph name={morphName.title(project.slug)} kind="text" on={[VT.title, VT.browse]}>
             <span className="inline-block">{project.title}</span>
           </Morph>
         </Link>

@@ -16,7 +16,7 @@ import { RepositoryPanel } from "@/components/project/repository-panel";
 import { Toc } from "@/components/project/toc";
 import { VideoList } from "@/components/project/video-list";
 import { ArrowLeft, ArrowRight } from "@/components/ui/icons";
-import { Morph, morphName, openProject } from "@/components/ui/morph";
+import { Morph, morphName, openNextByMedia, openNextByTitle, VIDEO_ANCHOR, videoHref, VT } from "@/components/ui/morph";
 import { extractToc, renderMDX } from "@/lib/content/mdx";
 import { getAllProjects, getProject } from "@/lib/content/projects";
 import { JsonLd, projectJsonLd } from "@/lib/seo";
@@ -74,7 +74,7 @@ export default async function ProjectPage(props: PageProps<"/work/[slug]">) {
           </p>
           <h1 className="mt-4 max-w-[18ch] text-title font-semibold tracking-[-0.035em] text-balance semi-wide">
             {/* The morph target hugs the text, so a card title scales into it without stretching. */}
-            <Morph name={morphName.title(project.slug)} kind="text">
+            <Morph name={morphName.title(project.slug)} kind="text" on={[VT.title, VT.nextTitle]}>
               <span className="inline-block">{project.title}</span>
             </Morph>
           </h1>
@@ -88,8 +88,9 @@ export default async function ProjectPage(props: PageProps<"/work/[slug]">) {
           </div>
         </header>
 
-        <div className="page gutter mt-10 md:mt-14">
-          <Morph name={morphName.media(project.slug)}>
+        {/* Media links open the page here (#video) and zoom the card's media into it. */}
+        <div id={VIDEO_ANCHOR} className="page gutter mt-10 scroll-mt-20 md:mt-14">
+          <Morph name={morphName.media(project.slug)} on={[VT.media, VT.nextMedia]}>
             <ProjectHeroMedia project={project} />
           </Morph>
         </div>
@@ -152,25 +153,25 @@ export default async function ProjectPage(props: PageProps<"/work/[slug]">) {
 
         {next && next.slug !== project.slug && (
           <nav aria-label="Next project" className="page gutter mt-32">
-            <Link
-              href={next.url}
-              {...openProject}
-              transitionTypes={["open-project", "open-next"]}
-              className="group grid gap-6 border-t border-line pt-6 md:grid-cols-12"
-              data-preview-root
-            >
-              <div className="md:col-span-4">
+            <div className="group grid gap-6 border-t border-line pt-6 md:grid-cols-12" data-preview-root>
+              <Link href={next.url} {...openNextByTitle} className="block md:col-span-4">
                 <p className="label">Next project</p>
                 <p className="mt-3 flex items-center gap-4 text-heading font-semibold tracking-tight semi-wide group-hover:text-accent">
-                  <Morph name={morphName.title(next.slug)} kind="text" only="open-next">
+                  <Morph name={morphName.title(next.slug)} kind="text" on={[VT.nextTitle]}>
                     <span>{next.title}</span>
                   </Morph>
                   <ArrowRight className="size-5 shrink-0" />
                 </p>
                 <p className="mt-3 text-fg-muted">{next.summary}</p>
-              </div>
-              <div className="md:col-span-5 md:col-start-8">
-                <Morph name={morphName.media(next.slug)} only="open-next">
+              </Link>
+              <Link
+                href={videoHref(next.url)}
+                {...openNextByMedia}
+                tabIndex={-1}
+                aria-hidden
+                className="block md:col-span-5 md:col-start-8"
+              >
+                <Morph name={morphName.media(next.slug)} on={[VT.nextMedia]}>
                   <ProjectMedia
                     slug={next.slug}
                     cover={next.cover}
@@ -179,8 +180,8 @@ export default async function ProjectPage(props: PageProps<"/work/[slug]">) {
                     sizes="(min-width: 768px) 40vw, 100vw"
                   />
                 </Morph>
-              </div>
-            </Link>
+              </Link>
+            </div>
           </nav>
         )}
       </article>

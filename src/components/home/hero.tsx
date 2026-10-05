@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ButtonLink } from "@/components/ui/button";
 import { ArrowRight, Download, Mail } from "@/components/ui/icons";
 import { LiveDot } from "@/components/ui/live-dot";
-import { openProject } from "@/components/ui/morph";
+import { openByTitle } from "@/components/ui/morph";
 import { site } from "@/config/site";
 import type { ProjectSummary } from "@/lib/content/projects";
 import { resumeHref } from "@/lib/site-links";
@@ -82,7 +82,7 @@ export async function Hero({ active }: { active: ProjectSummary[] }) {
                   <li key={p.slug}>
                     <Link
                       href={p.url}
-                      {...openProject}
+                      {...openByTitle}
                       className="inline-flex min-h-8 items-center gap-2 text-sm text-fg underline decoration-line-strong underline-offset-4 transition-colors hover:decoration-accent"
                     >
                       <LiveDot className="text-accent" />

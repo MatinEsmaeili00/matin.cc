@@ -94,15 +94,23 @@ code with `<GitHubCode>` rather than copying it when the repo is public.
   id: cog · viewfinder with blinking REC · pulsing live dot · travelling sine · material ball) — a new
   section id gets no icon until it's added there.
 - **Opening a project morphs into it** (React `<ViewTransition>` + the View Transitions API; browsers
-  without it just navigate). The card's media grows into the project hero, the title flies into the
-  `<h1>`, and the page rises in (`open-project` transition type). Wrap both sides in
-  `<Morph name={morphName.media(slug)}>` / `morphName.title` / `morphName.piece` (`components/ui/morph.tsx`)
-  and spread `{...openProject}` on links that open a project. **A name must be unique on a page** — a
-  duplicate cancels the whole transition (that's why "Now building" titles aren't named). React skips
-  morphs it measures off-screen, so `components/layout/scroll-first.tsx` scrolls the new page into
-  place first for links marked `data-scroll-first`. On phones the hero is below the fold, so only the
-  title morphs. "Next project" morphs only for its own link (`only="open-next"`). CSS: "Page
-  transitions" in globals.css. Test morphs on a production build (`next start`) — dev doesn't prefetch.
+  without it just navigate). What moves depends on what was clicked — each link carries transition
+  types, each `<Morph on={[…]}>` lists the ones it takes part in (`components/ui/morph.tsx`):
+  - **the name** (`{...openByTitle}`, card text / featured title / archive row / "Case study") → the
+    page opens at the top and the name glides into the `<h1>`;
+  - **the media** (`{...openByMedia}`, href `videoHref(url)`) → the page opens at its video section
+    (`#video`) and the card's media zooms into the hero; a preview loop there starts playing on
+    arrival (`use-preview-activation.ts`), so the clip keeps moving through the zoom;
+  - **a tech tag** (`{...browse}`) → cards fly to their places in the filtered Work list;
+  - "Next project" uses its own types (`openNextByTitle` / `openNextByMedia`) so a card for the same
+    project on the previous page never pairs with it.
+  Cards therefore have two links: the media (pointer-only, `tabIndex={-1} aria-hidden`) and the name.
+  **A morph name must be unique on a page** — a duplicate cancels the whole transition (that's why
+  "Now building" titles aren't named). React skips morphs it measures off-screen, so
+  `components/layout/scroll-first.tsx` scrolls the new page into place first (top or `#hash`) for
+  links marked `data-scroll-first`. The header is its own layer that holds still on top. Timing and
+  easing: "Page transitions" in globals.css (media 0.8 s, name 0.7 s). Test morphs on a production
+  build (`next start`) — dev doesn't prefetch.
 - **Live dot** (`components/ui/live-dot.tsx`) = work in progress: the In the Lab section,
   "Now building" in the hero, and every `status: active` project ("In development", via
   `components/project/status.tsx`).

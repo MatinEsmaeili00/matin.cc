@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { CSSProperties } from "react";
-import { scrollFirst } from "@/components/ui/morph";
+import { browse } from "@/components/ui/morph";
 import { techColor, techLabel, type TechId } from "@/config/taxonomy";
 import { cn } from "@/lib/utils";
 
@@ -44,7 +44,7 @@ export function TechTags({
         <li key={id} className="flex">
           <Link
             href={techHref(id)}
-            {...scrollFirst}
+            {...browse}
             className="tech-tag"
             data-plain={plain || undefined}
             style={techStyle(id)}

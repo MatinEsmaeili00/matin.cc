@@ -4,7 +4,7 @@ import { PreviewVideo } from "@/components/media/preview-video";
 import { ProceduralCover } from "@/components/media/procedural-cover";
 import { YouTubeHoverPreview } from "@/components/media/youtube-hover-preview";
 import { YouTubePlayer } from "@/components/media/youtube-player";
-import { Morph, morphName, openProject } from "@/components/ui/morph";
+import { Morph, morphName, openByMedia, VT } from "@/components/ui/morph";
 import type { Project, ProjectItem } from "@/lib/content/projects";
 import { cn } from "@/lib/utils";
 import { TechTags } from "./tech-tags";
@@ -44,8 +44,8 @@ export function ItemCard({
 }) {
   return (
     <article className="group" data-preview-root>
-      <Link href={`${project.url}#${item.id}`} {...openProject} className="block focus-visible:outline-offset-4">
-        <Morph name={morphName.piece(project.slug, item.id)}>
+      <Link href={`${project.url}#${item.id}`} {...openByMedia} className="block focus-visible:outline-offset-4">
+        <Morph name={morphName.piece(project.slug, item.id)} on={[VT.media]}>
           <ItemMedia item={item} sizes={sizes} />
         </Morph>
         <h3 className="mt-4 text-xl leading-tight font-semibold tracking-tight transition-colors group-hover:text-accent">
@@ -64,7 +64,7 @@ export function PieceGrid({ slug, items }: { slug: string; items: ProjectItem[] 
     <ul className="grid gap-x-6 gap-y-12 md:grid-cols-2">
       {items.map((item) => (
         <li key={item.id} id={item.id} className="scroll-mt-24" data-preview-root>
-          <Morph name={morphName.piece(slug, item.id)}>
+          <Morph name={morphName.piece(slug, item.id)} on={[VT.media]}>
             {item.youtube && item.image ? (
               <YouTubePlayer
                 id={item.youtube}

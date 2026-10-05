@@ -6,6 +6,9 @@ import { useEffect, useState, type RefObject } from "react";
  * When should a preview play?
  *   - Mouse/trackpad devices: while the card (closest [data-preview-root]) is hovered or focused.
  *   - Touch devices: while the element is ~60% on screen.
+ *   - Right away when the page was opened at it (the URL's #hash points at a
+ *     container of it — e.g. a card's media zoomed into the project's #video),
+ *     so the clip keeps playing through the zoom instead of turning into a still.
  *   - Never with prefers-reduced-motion or Save-Data.
  *
  * `exclusive` previews (YouTube iframes) stop any other exclusive preview when
@@ -36,6 +39,9 @@ export function usePreviewActivation(
       }
       setState((s) => (s.active ? s : { active: true, generation: s.generation + 1 }));
     };
+
+    const hash = decodeURIComponent(window.location.hash.slice(1));
+    if (hash && document.getElementById(hash)?.contains(el)) start();
 
     const hoverDevice = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
     if (hoverDevice) {

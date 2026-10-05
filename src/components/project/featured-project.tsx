@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ProjectMedia } from "@/components/media/project-media";
 import { ArrowRight, ArrowUpRight } from "@/components/ui/icons";
-import { Morph, morphName, openProject } from "@/components/ui/morph";
+import { Morph, morphName, openByMedia, openByTitle, videoHref, VT } from "@/components/ui/morph";
 import type { Project } from "@/lib/content/projects";
 import { githubRepoUrl } from "@/lib/refs";
 import { cn, pad2 } from "@/lib/utils";
@@ -38,13 +38,13 @@ export function FeaturedProject({ project, index }: { project: Project; index: n
       </header>
 
       <Link
-        href={project.url}
-        {...openProject}
+        href={videoHref(project.url)}
+        {...openByMedia}
         className={cn("block md:col-span-8", flip && "md:order-last")}
         tabIndex={-1}
         aria-hidden
       >
-        <Morph name={morphName.media(project.slug)}>
+        <Morph name={morphName.media(project.slug)} on={[VT.media, VT.browse]}>
           <ProjectMedia
             slug={project.slug}
             cover={project.cover}
@@ -59,8 +59,8 @@ export function FeaturedProject({ project, index }: { project: Project; index: n
 
       <div className="flex flex-col md:col-span-4">
         <h3 className="text-heading font-semibold tracking-tight semi-wide">
-          <Link href={project.url} {...openProject} className="transition-colors hover:text-accent">
-            <Morph name={morphName.title(project.slug)} kind="text">
+          <Link href={project.url} {...openByTitle} className="transition-colors hover:text-accent">
+            <Morph name={morphName.title(project.slug)} kind="text" on={[VT.title, VT.browse]}>
               <span className="inline-block">{project.title}</span>
             </Morph>
           </Link>
@@ -83,7 +83,7 @@ export function FeaturedProject({ project, index }: { project: Project; index: n
         <div className="mt-8 flex flex-wrap items-center gap-x-8 gap-y-3 md:mt-auto md:pt-8">
           <Link
             href={project.url}
-            {...openProject}
+            {...openByTitle}
             className="inline-flex min-h-11 items-center gap-3 font-mono text-[0.75rem] tracking-[0.12em] text-fg uppercase hover:text-accent"
           >
             Case study <ArrowRight className="size-3.5" />
