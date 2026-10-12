@@ -4,7 +4,7 @@
 
 Graphics / rendering engineer, technical artist, real-time simulation developer.
 Next.js 16 (App Router) + React 19 + TypeScript + Tailwind CSS 4 + Keystatic (CMS).
-Repo: github.com/MatinEsmaeili00/matin.cc (public). Domain: https://matin.cc (host: Hostinger — see Deployment).
+Repo: github.com/MatinEsmaeili00/matin.cc (public). Domain: https://matin.cc (live on Vercel — see Deployment).
 
 The site is **data-driven**: every project is one MDX file. Pages, cards, filters, sitemap, OG images,
 redirects and structured data are all generated from those files. Never hand-build a page for a project.
@@ -12,11 +12,11 @@ Matin edits content himself through the CMS; keep everything the CMS touches edi
 
 ## Status & continuing on another computer (read this first)
 
-**Where things stand (last updated Oct 2026):** the site is complete and lives only on GitHub — it is
-**not deployed yet** — host chosen: Hostinger Business Web Hosting as a Node.js Web App (step-by-step in
-`docs/DEPLOY-HOSTINGER.md`); the old WordPress site is still live at matin.cc until then. 30 projects are migrated. Recent work: light HR-friendly theme with dark toggle, Keystatic
-CMS + /admin, homepage organised into the old site's sections plus "In the Lab", hover/scroll video
-previews everywhere, Mermaid-style architecture diagrams.
+**Where things stand (last updated Oct 2026):** the site is **live at https://matin.cc on Vercel**
+(free Hobby plan, auto-deploys `main`; setup and day-to-day in `docs/DEPLOY.md`). 30 projects are
+migrated. Recent work: light HR-friendly theme with dark toggle, Keystatic CMS + /admin, homepage
+organised into the old site's sections plus "In the Lab", hover/scroll video previews everywhere,
+Mermaid-style architecture diagrams.
 
 **Set up a new machine:**
 
@@ -34,8 +34,8 @@ yt-dlp downloads itself into `.cache/` the first time `npm run media` gets a You
 
 1. GitHub Actions are parked in `docs/github-workflows/` (pushing `.github/` needs the `workflow`
    token scope) — see the README there to activate them.
-2. Deployment: Matin follows `docs/DEPLOY-HOSTINGER.md` (temporary domain first → back up and remove
-   WordPress → connect matin.cc). Afterwards, check inode usage (the plan was at 48 % before).
+2. Hostinger clean-up (Matin): back up and then delete the old WordPress site (no longer served —
+   matin.cc's DNS points to Vercel) and the failed Node.js app on matinesmaeili.site.
 3. Content Matin still owes (details in `docs/MIGRATION.md` §5): videos for Snow/Sand/GPULab/Building
    Visualization/Robot Voice Control, résumé PDF + photo (CMS → Site settings), About page details,
    unconfirmed roles (Robots & Humans, Sud Enforcer, Jewel Seeker), team-size conflicts.
@@ -62,7 +62,7 @@ code with `<GitHubCode>` rather than copying it when the repo is public.
 
 - `npm run dev`, then **http://localhost:3000/admin** — dashboard: Edit content (→ `/keystatic`),
   content check, **Publish** (validates, commits `content/` + `public/`, pushes), **Rebuild live site**
-  (POSTs `DEPLOY_HOOK_URL` if set; otherwise links to hPanel → Redeploy). Server actions in `src/app/admin/actions.ts`.
+  (POSTs `DEPLOY_HOOK_URL`, a Vercel deploy hook). Server actions in `src/app/admin/actions.ts`.
 - `keystatic.config.ts` defines the editor. **Its fields must mirror `src/lib/content/schema.ts`** —
   when you add/rename a frontmatter field, change both. Category/tech dropdowns are generated from
   `categories.json` and `TECH`.
@@ -217,10 +217,9 @@ public/media/<slug>/        optimized media per project
 - **Public pages are statically generated.** GitHub and YouTube are fetched once per build. No API
   calls on page load, no secrets reach the client.
 - **Rebuilds are manual** (Matin's choice — no schedule): Publish in /admin pushes to `main`, and
-  Hostinger auto-deploys every push to `main` (code pushes too — use a branch for unfinished work).
-  To refresh GitHub/YouTube data without a content change: hPanel → Deployments → Redeploy (Hostinger
-  has no deploy-hook URL, so the /admin "Rebuild" panel links there; `DEPLOY_HOOK_URL` and the parked
-  `rebuild.yml` only apply to hosts that have one).
+  Vercel auto-deploys every push to `main` (code pushes too — other branches get preview URLs).
+  To refresh GitHub/YouTube data without a content change: "Rebuild live site" in /admin (Vercel
+  deploy hook in `DEPLOY_HOOK_URL`), Vercel → Deployments → Redeploy, or the parked `rebuild.yml`.
 - Integrations never fail the build: GitHub/YouTube helpers return null and components fall back.
   Content errors *do* fail the build — `prebuild` runs `validate`.
 - `src/lib/content/load.ts` and `validate.ts` must stay free of Next/React imports (the CLI scripts use them).
@@ -292,15 +291,18 @@ npm run build             # production build (locally: GITHUB_TOKEN=$(gh auth to
 
 ## Deployment
 
-**Hostinger Business Web Hosting → Node.js Web App**, imported from GitHub (`main`, auto-deploy on
-push). Full walkthrough: `docs/DEPLOY-HOSTINGER.md`. Settings: framework Next.js, Node 24 (22 works),
-npm, build script `build`, output `.next`, no entry file. Env vars in hPanel: `GITHUB_TOKEN`
-(fine-grained, public repos read-only) and optionally `YOUTUBE_API_KEY` — they're available at build
-and runtime; saving them redeploys. No `KEYSTATIC_*` vars, so /admin and /keystatic 404 live.
-Hostinger runs `npm install` (dev packages included — the build needs tsx, Tailwind, TypeScript) then
-`npm run build`; install and build each have a 15-minute limit; a failed build keeps the previous
-version live. `ffmpeg-static` is an optionalDependency so a failed ffmpeg download can't break the
-install (only `npm run media` uses it). Never commit tokens.
+**Vercel (Hobby)**, project `matin-cc`, imported from GitHub `main` with default Next.js settings;
+Node 24 (`engines: "24.x"`). Env vars in Vercel: `GITHUB_TOKEN` (fine-grained, public repos, no
+permissions) and `YOUTUBE_API_KEY`. No `KEYSTATIC_*` vars, so /admin and /keystatic 404 live.
+Domains: `matin.cc` is primary (it's `site.url`, canonical and sitemap — never redirect apex → www);
+`www.matin.cc` 308-redirects to it. DNS is managed at Hostinger (hPanel), pointing `@`/`www` to Vercel.
+Setup record, day-to-day and troubleshooting: `docs/DEPLOY.md`. Never commit tokens or the deploy hook.
+`ffmpeg-static` is an optionalDependency (only `npm run media` uses it), so a failed ffmpeg download
+can't break a host's install.
+
+Hostinger's Node.js hosting was tried first and doesn't work with this setup: its glibc is older than
+2.29 and Next's native SWC needs 2.30. A webpack + plain-JS-config workaround is parked on the
+`hostinger` branch — don't merge it into `main`.
 CI (`ci.yml`: validate, typecheck, lint, build on push/PR) and the manual `rebuild.yml` are parked in
 `docs/github-workflows/` until a token with the `workflow` scope moves them into `.github/workflows/`.
 

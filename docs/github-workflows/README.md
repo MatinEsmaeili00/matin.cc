@@ -14,5 +14,5 @@ git add .github && git commit -m "Add CI and rebuild workflows" && git push
 ```
 
 - `ci.yml` — validate, typecheck, lint and build on every push / pull request.
-- `rebuild.yml` — manual "Rebuild site" button (Actions tab). Needs the `DEPLOY_HOOK_URL` repository secret.
-  Hostinger (the chosen host) has no deploy-hook URL, so skip this one — use hPanel → Redeploy instead.
+- `rebuild.yml` — manual "Rebuild site" button (Actions tab). Needs the `DEPLOY_HOOK_URL` repository secret
+  (the same Vercel deploy hook as in `.env.local`).
