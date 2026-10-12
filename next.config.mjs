@@ -1,8 +1,10 @@
+// Plain JavaScript on purpose: Hostinger's build servers have a glibc too old
+// for Next's native compiler, and the WebAssembly fallback it uses there can't
+// load a TypeScript config. Keep this file (and what it imports) free of TS.
 import fs from "node:fs";
 import path from "node:path";
-import type { NextConfig } from "next";
 import matter from "gray-matter";
-import { staticRedirects } from "./src/config/redirects";
+import { staticRedirects } from "./src/config/redirects.mjs";
 
 /**
  * Old URLs listed in each project's `aliases` frontmatter 301 to the
@@ -18,12 +20,14 @@ function projectAliasRedirects() {
     .flatMap((file) => {
       const { data } = matter(fs.readFileSync(path.join(dir, file), "utf8"));
       const slug = file.replace(/\.mdx$/, "");
-      const aliases: string[] = Array.isArray(data.aliases) ? data.aliases : [];
+      /** @type {string[]} */
+      const aliases = Array.isArray(data.aliases) ? data.aliases : [];
       return aliases.map((source) => ({ source, destination: `/work/${slug}` }));
     });
 }
 
-const nextConfig: NextConfig = {
+/** @type {import("next").NextConfig} */
+const nextConfig = {
   poweredByHeader: false,
 
   images: {

@@ -2,9 +2,12 @@
  * Permanent redirects for old URLs that don't belong to a single project.
  *
  * Project-specific old URLs live in each project's `aliases` field instead,
- * so they move with the project. Both lists are merged in next.config.ts.
+ * so they move with the project. Both lists are merged in next.config.mjs
+ * (plain JavaScript, so this file is too).
+ *
+ * @type {{ source: string; destination: string }[]}
  */
-export const staticRedirects: { source: string; destination: string }[] = [
+export const staticRedirects = [
   // Old WordPress pages
   { source: "/contact", destination: "/about#contact" },
   { source: "/blog", destination: "/" },

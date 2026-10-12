@@ -86,7 +86,7 @@ files, database and email settings**. Before removing it:
    SSL is installed automatically. The domain is already on Hostinger, so this usually takes
    minutes (Hostinger says up to 24 h for DNS).
 3. Check `https://matin.cc` and `https://www.matin.cc`. Old WordPress URLs redirect automatically
-   (project `aliases` + `src/config/redirects.ts`).
+   (project `aliases` + `src/config/redirects.mjs`).
 
 The site is down only between removing WordPress and connecting the domain.
 
@@ -112,6 +112,8 @@ The site is down only between removing WordPress and connecting the domain.
 
 | Build log says | Fix |
 |---|---|
+| `GLIBC_2.29 not found` + "Failed to load next.config.ts" | Fixed already: Hostinger's Linux is too old for Next's native compiler, so the build uses webpack and a plain-JS `next.config.mjs`. The `GLIBC` warning and "Downloading swc package @next/swc-wasm-nodejs" lines are expected. |
+| Images broken on the live site (but the build passed) | The image resizer (sharp) needs glibc 2.28 — ask Claude to set `images.unoptimized`. |
 | `tsx: not found`, or can't find `typescript` / `@tailwindcss/postcss` | Hostinger skipped dev packages — ask Claude to move the build tools into `dependencies`. |
 | `JavaScript heap out of memory` | Add the env var `NODE_OPTIONS` = `--max-old-space-size=2048`. |
 | A content error (`✗ …mdx`) | Run `npm run validate` locally, fix, publish again. |

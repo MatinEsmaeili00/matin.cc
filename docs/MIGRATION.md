@@ -68,7 +68,7 @@ Nothing was silently deleted: every old URL either has a new home or redirects s
 | `/rocket-ss` | Empty "Rocket" stub — no content or media found anywhere | `/work` |
 
 All redirects are permanent (308). Project-specific ones live in each file's `aliases`; the rest
-in `src/config/redirects.ts`.
+in `src/config/redirects.mjs`.
 
 ## 3. Assets
 
