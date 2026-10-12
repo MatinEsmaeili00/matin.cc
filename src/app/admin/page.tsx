@@ -94,7 +94,7 @@ export default async function AdminPage() {
           </div>
           <p className="mt-4 text-sm text-fg-faint">
             Commits the <code>content/</code> and <code>public/</code> folders and pushes them to GitHub.
-            If your host deploys from GitHub, the live site rebuilds by itself.
+            Hostinger sees the push and rebuilds the live site by itself (a few minutes).
           </p>
         </Panel>
 
@@ -102,12 +102,24 @@ export default async function AdminPage() {
           <p className="mb-4 text-fg-muted">
             Rebuild without publishing anything — for example to refresh GitHub stars and video titles.
           </p>
-          <RebuildForm configured={hookConfigured} />
-          {!hookConfigured && (
-            <p className="mt-4 text-sm text-fg-faint">
-              To enable this button, copy your host&rsquo;s deploy/build hook URL into <code>.env.local</code> as{" "}
-              <code>DEPLOY_HOOK_URL=…</code> and restart <code>npm run dev</code>.
-            </p>
+          {hookConfigured ? (
+            <RebuildForm configured />
+          ) : (
+            <>
+              <a
+                href="https://hpanel.hostinger.com/websites"
+                target="_blank"
+                rel="noopener"
+                className="inline-flex min-h-11 items-center gap-2 rounded-md border border-line-strong px-5 font-medium text-fg transition-colors hover:border-fg"
+              >
+                Open Hostinger <ArrowUpRight className="size-2.5" />
+              </a>
+              <p className="mt-4 text-sm text-fg-faint">
+                In hPanel: Websites → {new URL(site.url).hostname} → Deployments → <strong>Redeploy</strong>. (A host
+                with a deploy-hook URL can use a button here instead: set <code>DEPLOY_HOOK_URL</code> in{" "}
+                <code>.env.local</code>.)
+              </p>
+            </>
           )}
         </Panel>
       </div>
