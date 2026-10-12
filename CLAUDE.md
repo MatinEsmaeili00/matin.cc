@@ -206,7 +206,7 @@ keystatic.config.ts         CMS definition
 src/app/(site)/             public pages: / · /work · /work/[slug] · /about (header/footer layout)
 src/app/keystatic/, api/    CMS UI + API (gated by lib/cms.ts)
 src/app/admin/              local dashboard: check / publish / rebuild
-src/config/                 site.ts · taxonomy.ts · redirects.mjs
+src/config/                 site.ts · taxonomy.ts · redirects.ts
 src/lib/content/            schema · load (plain Node, shared with scripts) · validate · projects (server) · mdx
 src/lib/github.ts, youtube.ts, highlight.ts, seo.tsx, og.tsx, cms.ts, diagram.ts
 src/components/             layout/ · home/ · project/ · media/ · code/ · diagram/ · mdx/ · ui/
@@ -301,17 +301,10 @@ Hostinger runs `npm install` (dev packages included — the build needs tsx, Tai
 `npm run build`; install and build each have a 15-minute limit; a failed build keeps the previous
 version live. `ffmpeg-static` is an optionalDependency so a failed ffmpeg download can't break the
 install (only `npm run media` uses it). Never commit tokens.
-
-**Hostinger's glibc is older than 2.29**, too old for Next's native SWC binary (needs 2.30). Next falls
-back to its WebAssembly compiler there, which Turbopack can't use and which can't load a TypeScript
-config. So: `npm run build` is `next build --webpack` (dev keeps Turbopack), and `next.config.mjs` +
-`src/config/redirects.mjs` stay plain JavaScript — don't convert them back to `.ts`. Reproduce the
-host locally with `NEXT_TEST_WASM=1 npm run build`. Other native packages are fine there (Tailwind
-oxide and lightningcss need glibc 2.14, sharp's libvips 2.28).
 CI (`ci.yml`: validate, typecheck, lint, build on push/PR) and the manual `rebuild.yml` are parked in
 `docs/github-workflows/` until a token with the `workflow` scope moves them into `.github/workflows/`.
 
 ## Migration notes
 
 The site replaced a WordPress install. `docs/MIGRATION.md` records what moved where, what was merged,
-and open questions for Matin. Old URLs redirect via project `aliases` and `src/config/redirects.mjs`.
+and open questions for Matin. Old URLs redirect via project `aliases` and `src/config/redirects.ts`.
